@@ -124,7 +124,7 @@ const BOT_COMPANIES = [
   { ticker: 'PGR', name: 'Progressive Corporation', sector: 'Finance', basePrice: 185.90, marketCap: 109000000000 },
 
   // Continue to Part 3 for remaining sectors...
-];
+
 
 // ===== SESSION INFO FOR VISHALSNW =====
 console.log(`🏢 Bot Companies Database loaded for ${currentUser} at ${currentDateTimeUTC} UTC`);
