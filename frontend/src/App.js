@@ -1,127 +1,269 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import './App.css';
+import { AuthProvider } from './context/AuthContext';
+import { CompanyProvider } from './context/CompanyContext';
+import { MarketProvider } from './context/MarketContext';
+import { TradingProvider } from './context/TradingContext';
+import { GameProvider } from './context/GameContext';
+import { useAuth } from './context/AuthContext';
 
 // Components
+import Login from './components/Auth/Login';
+import Register from './components/Auth/Register';
 import Dashboard from './components/Dashboard/Dashboard';
-import TradingInterface from './components/Trading/TradingInterface';
-import Navbar from './components/Navigation/Navbar';
-import Sidebar from './components/Navigation/Sidebar';
-import Portfolio from './components/Portfolio/Portfolio';
-import Company from './components/Company/Company';
-import IPO from './components/IPO/IPO';
-import Profile from './components/Profile/Profile';
-import LoadingScreen from './components/Common/LoadingScreen';
+import LoadingScreen from './components/UI/LoadingScreen';
+import ErrorBoundary from './components/UI/ErrorBoundary';
 
-// Context
-import { AuthProvider, useAuth } from './context/AuthContext';
-import { ThemeProvider, useTheme } from './context/ThemeContext';
-import { NotificationProvider } from './context/NotificationContext';
+// CSS
+import './App.css';
+import './styles/variables.css';
+import './styles/global.css';
 
-function App() {
-  return (
-    <AuthProvider>
-      <ThemeProvider>
-        <NotificationProvider>
-          <Router>
-            <AppContent />
-          </Router>
-        </NotificationProvider>
-      </ThemeProvider>
-    </AuthProvider>
-  );
-}
-
-function AppContent() {
-  const { user, loading: authLoading, login, logout } = useAuth();
-  const { theme, toggleTheme } = useTheme();
+// Protected Route Component
+const ProtectedRoute = ({ children }) => {
+  const { user, isLoading } = useAuth();
   
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [currentPage, setCurrentPage] = useState('dashboard');
-  const [marketStatus, setMarketStatus] = useState({
-    isOpen: true,
-    nextOpen: null,
-    nextClose: null
-  });
+  if (isLoading) {
+    return <LoadingScreen />;
+  }
+  
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+  
+  return children;
+};
 
-  // Initialize user data
-  const [userData, setUserData] = useState({
-    username: 'Vishalsnw',
-    email: 'vishal@stockforge.com',
-    balance: 100000,
-    portfolio: 25000,
-    totalValue: 125000,
-    dayChange: 2500,
-    dayChangePercent: 2.04,
-    joinDate: '2025-01-15',
-    level: 'Professional Trader',
-    completedTrades: 156,
-    winRate: 68.5
-  });
+// Public Route Component (redirect if logged in)
+const PublicRoute = ({ children }) => {
+  const { user, isLoading } = useAuth();
+  
+  if (isLoading) {
+    return <LoadingScreen />;
+  }
+  
+  if (user) {
+    return <Navigate to="/dashboard" replace />;
+  }
+  
+  return children;
+};
 
-  // Market status check
+// Main App Component with Context Providers
+const AppContent = () => {
+  const { user, isLoading, initializeAuth } = useAuth();
+  const [appLoading, setAppLoading] = useState(true);
+  const [theme, setTheme] = useState('dark');
+  const [notifications, setNotifications] = useState(true);
+
+  // Initialize app
   useEffect(() => {
-    const checkMarketStatus = () => {
-      const now = new Date();
-      const currentHour = now.getHours();
-      const currentDay = now.getDay(); // 0 = Sunday, 6 = Saturday
-      
-      // Indian market: Mon-Fri, 9:15 AM - 3:30 PM IST
-      const isWeekday = currentDay >= 1 && currentDay <= 5;
-      const isMarketHours = currentHour >= 9 && currentHour < 16;
-      
-      setMarketStatus({
-        isOpen: isWeekday && isMarketHours,
-        nextOpen: isWeekday ? null : 'Monday 9:15 AM',
-        nextClose: isMarketHours ? 'Today 3:30 PM' : null
-      });
+    const initializeApp = async () => {
+      try {
+        // Load theme from localStorage
+        const savedTheme = localStorage.getItem('stockforge_theme');
+        if (savedTheme) {
+          setTheme(savedTheme);
+          document.documentElement.setAttribute('data-theme', savedTheme);
+        }
+
+        // Load notification preference
+        const savedNotifications = localStorage.getItem('stockforge_notifications');
+        if (savedNotifications !== null) {
+          setNotifications(JSON.parse(savedNotifications));
+        }
+
+        // Initialize authentication
+        await initializeAuth();
+
+        // Simulate app loading (remove in production)
+        setTimeout(() => {
+          setAppLoading(false);
+        }, 1500);
+
+      } catch (error) {
+        console.error('Failed to initialize app:', error);
+        setAppLoading(false);
+      }
     };
 
-    checkMarketStatus();
-    const interval = setInterval(checkMarketStatus, 60000); // Check every minute
-    
-    return () => clearInterval(interval);
-  }, []);
+    initializeApp();
+  }, [initializeAuth]);
 
-  // Auto-login for demo (remove in production)
-  useEffect(() => {
-    if (!user && !authLoading) {
-      login({
-        username: 'Vishalsnw',
-        email: 'vishal@stockforge.com',
-        uid: 'demo-user-123'
-      });
-    }
-  }, [user, authLoading, login]);
+  // Theme toggle function
+  const toggleTheme = () => {
+    const newTheme = theme === 'dark' ? 'light' : 'dark';
+    setTheme(newTheme);
+    document.documentElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('stockforge_theme', newTheme);
+  };
 
-  // Loading screen
-  if (authLoading) {
-    return <LoadingScreen message="Loading StockForge..." />;
+  // Notification toggle function
+  const toggleNotifications = () => {
+    const newNotifications = !notifications;
+    setNotifications(newNotifications);
+    localStorage.setItem('stockforge_notifications', JSON.stringify(newNotifications));
+  };
+
+  // Show loading screen during app initialization
+  if (appLoading || isLoading) {
+    return <LoadingScreen message="Initializing StockForge..." />;
   }
 
-  // Login required
-  if (!user) {
+  return (
+    <div className={`app ${theme}`}>
+      <Routes>
+        {/* Public Routes */}
+        <Route 
+          path="/login" 
+          element={
+            <PublicRoute>
+              <Login />
+            </PublicRoute>
+          } 
+        />
+        
+        <Route 
+          path="/register" 
+          element={
+            <PublicRoute>
+              <Register />
+            </PublicRoute>
+          } 
+        />
+
+        {/* Protected Routes */}
+        <Route 
+          path="/dashboard/*" 
+          element={
+            <ProtectedRoute>
+              <CompanyProvider>
+                <MarketProvider>
+                  <TradingProvider>
+                    <GameProvider>
+                      <Dashboard 
+                        theme={theme}
+                        toggleTheme={toggleTheme}
+                        notifications={notifications}
+                        toggleNotifications={toggleNotifications}
+                      />
+                    </GameProvider>
+                  </TradingProvider>
+                </MarketProvider>
+              </CompanyProvider>
+            </ProtectedRoute>
+          } 
+        />
+
+        {/* Default Route */}
+        <Route 
+          path="/" 
+          element={
+            user ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />
+          } 
+        />
+
+        {/* 404 Route */}
+        <Route 
+          path="*" 
+          element={
+            <div className="not-found">
+              <div className="not-found-content">
+                <h1>🎮 404 - Page Not Found</h1>
+                <p>The page you're looking for doesn't exist in StockForge.</p>
+                <button 
+                  onClick={() => window.location.href = user ? '/dashboard' : '/login'}
+                  className="back-home-btn"
+                >
+                  {user ? 'Back to Dashboard' : 'Go to Login'}
+                </button>
+              </div>
+            </div>
+          } 
+        />
+      </Routes>
+    </div>
+  );
+};
+
+// Root App Component
+const App = () => {
+  const [error, setError] = useState(null);
+
+  // Global error handler
+  useEffect(() => {
+    const handleError = (event) => {
+      console.error('Global error caught:', event.error);
+      setError(event.error);
+    };
+
+    const handleUnhandledRejection = (event) => {
+      console.error('Unhandled promise rejection:', event.reason);
+      setError(event.reason);
+    };
+
+    window.addEventListener('error', handleError);
+    window.addEventListener('unhandledrejection', handleUnhandledRejection);
+
+    return () => {
+      window.removeEventListener('error', handleError);
+      window.removeEventListener('unhandledrejection', handleUnhandledRejection);
+    };
+  }, []);
+
+  // Global keyboard shortcuts
+  useEffect(() => {
+    const handleKeyboardShortcuts = (event) => {
+      // Ctrl/Cmd + K for search
+      if ((event.ctrlKey || event.metaKey) && event.key === 'k') {
+        event.preventDefault();
+        const searchInput = document.querySelector('.search-input');
+        if (searchInput) {
+          searchInput.focus();
+        }
+      }
+
+      // Escape to close modals
+      if (event.key === 'Escape') {
+        const closeButtons = document.querySelectorAll('.close-btn, .modal-overlay');
+        if (closeButtons.length > 0) {
+          closeButtons[closeButtons.length - 1].click();
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyboardShortcuts);
+    return () => document.removeEventListener('keydown', handleKeyboardShortcuts);
+  }, []);
+
+  // Show error screen if critical error occurs
+  if (error) {
     return (
-      <div className="app-container login-required">
-        <div className="login-prompt">
-          <div className="logo-section">
-            <h1>📊 StockForge</h1>
-            <p>Professional Stock Trading Simulation</p>
-          </div>
-          <div className="login-form">
-            <h2>Welcome to StockForge</h2>
-            <p>Build your trading empire with realistic market simulation</p>
-            <button 
-              className="demo-login-btn"
-              onClick={() => login(userData)}
-            >
-              🚀 Start Trading Demo
-            </button>
-            <div className="feature-list">
-              <div className="feature-item">✅ Real-time market data</div>
-              <div className="feature-item">✅ Advanced trading tools</div>
-              <div className="feature-item">✅ Portfolio management</div>
-              <div className="feature-item">✅ Company management</div>
+      <div className="app error-state">
+        <div className="error-screen">
+          <div className="error-content">
+            <h1>🔥 Something went wrong!</h1>
+            <p>StockForge encountered an unexpected error.</p>
+            <details className="error-details">
+              <summary>Error Details</summary>
+              <pre>{error.toString()}</pre>
+            </details>
+            <div className="error-actions">
+              <button 
+                onClick={() => window.location.reload()}
+                className="reload-btn"
+              >
+                🔄 Reload Page
+              </button>
+              <button 
+                onClick={() => {
+                  localStorage.clear();
+                  window.location.href = '/login';
+                }}
+                className="reset-btn"
+              >
+                🗑️ Clear Data & Restart
+              </button>
             </div>
           </div>
         </div>
@@ -129,176 +271,15 @@ function AppContent() {
     );
   }
 
-  const toggleSidebar = () => {
-    setSidebarOpen(!sidebarOpen);
-  };
-
   return (
-    <div className={`app-container ${theme} ${sidebarOpen ? 'sidebar-open' : ''}`}>
-      {/* Navigation */}
-      <Navbar 
-        user={userData}
-        marketStatus={marketStatus}
-        onToggleSidebar={toggleSidebar}
-        onToggleTheme={toggleTheme}
-        currentTheme={theme}
-        onLogout={logout}
-      />
-      
-      <Sidebar 
-        isOpen={sidebarOpen}
-        currentPage={currentPage}
-        onPageChange={setCurrentPage}
-        onClose={() => setSidebarOpen(false)}
-        user={userData}
-      />
-
-      {/* Main Content */}
-      <main className="main-content">
-        <div className="content-wrapper">
-          <Routes>
-            {/* Dashboard - Default Route */}
-            <Route 
-              path="/" 
-              element={
-                <Dashboard 
-                  user={userData}
-                  marketStatus={marketStatus}
-                  onNavigate={setCurrentPage}
-                />
-              } 
-            />
-            
-            {/* Trading Interface */}
-            <Route 
-              path="/trading" 
-              element={
-                <TradingInterface 
-                  user={userData}
-                  marketStatus={marketStatus}
-                />
-              } 
-            />
-            
-            {/* Portfolio Management */}
-            <Route 
-              path="/portfolio" 
-              element={
-                <Portfolio 
-                  user={userData}
-                  onUpdateBalance={(newBalance) => 
-                    setUserData(prev => ({ ...prev, ...newBalance }))
-                  }
-                />
-              } 
-            />
-            
-            {/* Company Management */}
-            <Route 
-              path="/company" 
-              element={
-                <Company 
-                  user={userData}
-                  onUpdateCompany={(companyData) => 
-                    console.log('Company updated:', companyData)
-                  }
-                />
-              } 
-            />
-            
-            {/* IPO Center */}
-            <Route 
-              path="/ipo" 
-              element={
-                <IPO 
-                  user={userData}
-                  marketStatus={marketStatus}
-                />
-              } 
-            />
-            
-            {/* User Profile */}
-            <Route 
-              path="/profile" 
-              element={
-                <Profile 
-                  user={userData}
-                  onUpdateProfile={(newData) => 
-                    setUserData(prev => ({ ...prev, ...newData }))
-                  }
-                />
-              } 
-            />
-            
-            {/* Catch all - redirect to dashboard */}
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </div>
-      </main>
-
-      {/* Market Status Indicator */}
-      <div className={`market-status-fixed ${marketStatus.isOpen ? 'open' : 'closed'}`}>
-        <div className="status-indicator">
-          <span className="status-dot"></span>
-          <span className="status-text">
-            Market {marketStatus.isOpen ? 'OPEN' : 'CLOSED'}
-          </span>
-        </div>
-        {!marketStatus.isOpen && marketStatus.nextOpen && (
-          <div className="next-session">
-            Next: {marketStatus.nextOpen}
-          </div>
-        )}
-      </div>
-
-      {/* Current Time Display */}
-      <div className="current-time-display">
-        <CurrentTime />
-      </div>
-
-      {/* Background Elements */}
-      <div className="app-background">
-        <div className="bg-grid"></div>
-        <div className="bg-gradient-1"></div>
-        <div className="bg-gradient-2"></div>
-      </div>
-    </div>
+    <ErrorBoundary>
+      <Router>
+        <AuthProvider>
+          <AppContent />
+        </AuthProvider>
+      </Router>
+    </ErrorBoundary>
   );
-}
-
-// Current Time Component
-function CurrentTime() {
-  const [currentTime, setCurrentTime] = useState(new Date());
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentTime(new Date());
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, []);
-
-  return (
-    <div className="time-widget">
-      <div className="date">
-        {currentTime.toLocaleDateString('en-IN', {
-          weekday: 'short',
-          year: 'numeric',
-          month: 'short',
-          day: 'numeric'
-        })}
-      </div>
-      <div className="time">
-        {currentTime.toLocaleTimeString('en-IN', {
-          hour12: false,
-          hour: '2-digit',
-          minute: '2-digit',
-          second: '2-digit'
-        })}
-      </div>
-      <div className="timezone">IST</div>
-    </div>
-  );
-}
+};
 
 export default App;
