@@ -34,11 +34,7 @@ const MARKET_CONFIG = {
 // ===== STOCKFORGE MARKET GAME ENGINE - PART 2/8 =====
 // ===== BOT COMPANIES DATABASE =====
 
-  // ===== CURRENT INFO (Updated) =====
-  const currentUser = 'Vishalsnw';
-  const currentDateTimeUTC = '2025-06-11 21:15:06';
-  const currentDate = '2025-06-11';
-  const currentTime = '21:15:06';
+  
 
 // ===== BOT COMPANIES DATABASE (150 Companies) =====
 const BOT_COMPANIES = [
@@ -247,12 +243,7 @@ console.log(`💰 Total Market Cap: $24.5+ Trillion USD`);
 // ===== STOCKFORGE MARKET GAME ENGINE - PART 4/8 =====
 // ===== UTILITY FUNCTIONS & MARKET LOGIC =====
 
-  // ===== CURRENT INFO (Updated) =====
-  const currentUser = 'Vishalsnw';
-  const currentDateTimeUTC = '2025-06-11 21:18:43';
-  const currentDate = '2025-06-11';
-  const currentTime = '21:18:43';
-
+  
 // ===== MAIN HOOK FUNCTION START =====
 export const useBotMarket = () => {
   // ===== CURRENT SESSION INFO =====
@@ -403,11 +394,7 @@ export const useBotMarket = () => {
   // ===== STOCKFORGE MARKET GAME ENGINE - PART 5/8 =====
 // ===== MARKET DATA UPDATE ENGINE =====
 
-  // ===== CURRENT INFO (Updated) =====
-  const currentUser = 'Vishalsnw';
-  const currentDateTimeUTC = '2025-06-11 21:20:19';
-  const currentDate = '2025-06-11';
-  const currentTime = '21:20:19';
+  
 
   // ===== MAIN MARKET DATA UPDATE FUNCTION =====
   const updateMarketData = useCallback(() => {
