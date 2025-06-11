@@ -126,12 +126,7 @@ const BOT_COMPANIES = [
   // Continue to Part 3 for remaining sectors...
 
 
-// ===== SESSION INFO FOR VISHALSNW =====
-console.log(`🏢 Bot Companies Database loaded for ${currentUser} at ${currentDateTimeUTC} UTC`);
-console.log(`📊 Technology Sector: 25 companies loaded`);
-console.log(`🏥 Healthcare Sector: 25 companies loaded`);
-console.log(`🏦 Finance Sector: 25 companies loaded`);
-console.log(`⚡ Remaining sectors loading in Part 3...`);
+
 
 // Continue to Part 3...
 // ===== STOCKFORGE MARKET GAME ENGINE - PART 3/8 =====
