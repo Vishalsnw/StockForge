@@ -132,11 +132,7 @@ const BOT_COMPANIES = [
 // ===== STOCKFORGE MARKET GAME ENGINE - PART 3/8 =====
 // ===== REMAINING BOT COMPANIES DATABASE =====
 
-  // ===== CURRENT INFO (Updated) =====
-  const currentUser = 'Vishalsnw';
-  const currentDateTimeUTC = '2025-06-11 21:16:36';
-  const currentDate = '2025-06-11';
-  const currentTime = '21:16:36';
+  
 
   // ===== ENERGY SECTOR (19 companies) =====
   { ticker: 'XOM', name: 'Exxon Mobil Corporation', sector: 'Energy', basePrice: 108.45, marketCap: 452000000000 },
