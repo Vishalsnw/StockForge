@@ -13,467 +13,307 @@ export const useMarket = () => {
 export const MarketProvider = ({ children }) => {
   const [marketStatus, setMarketStatus] = useState({
     isOpen: false,
-    session: 'pre-market',
-    nextSession: 'market-open',
-    timeToNext: 0,
-    lastUpdate: new Date().toISOString()
+    openTime: '09:15',
+    closeTime: '15:30',
+    timezone: 'Asia/Kolkata'
   });
 
   const [indices, setIndices] = useState({
-    nifty50: {
-      name: 'NIFTY 50',
-      symbol: 'NIFTY',
-      value: 19845.30,
-      change: 125.40,
-      changePercent: 0.63,
-      high: 19950.75,
-      low: 19720.15,
-      open: 19719.90,
-      prevClose: 19719.90,
-      volume: 0,
-      lastUpdate: new Date().toISOString()
+    stockforge50: {
+      name: 'STOCKFORGE 50',
+      value: 15248.32,
+      change: 127.45,
+      changePercent: 0.84,
+      high: 15298.67,
+      low: 15089.23,
+      volume: 2847592
     },
-    sensex: {
-      name: 'SENSEX',
-      symbol: 'SENSEX',
-      value: 66598.91,
-      change: 389.73,
-      changePercent: 0.59,
-      high: 66850.22,
-      low: 66209.18,
-      open: 66209.18,
-      prevClose: 66209.18,
-      volume: 0,
-      lastUpdate: new Date().toISOString()
+    niftyGaming: {
+      name: 'NIFTY GAMING',
+      value: 8956.78,
+      change: -23.12,
+      changePercent: -0.26,
+      high: 9012.45,
+      low: 8923.56,
+      volume: 1536748
     },
-    bankNifty: {
-      name: 'BANK NIFTY',
-      symbol: 'BANKNIFTY',
-      value: 45234.75,
-      change: -89.25,
-      changePercent: -0.20,
-      high: 45456.80,
-      low: 45134.20,
-      open: 45324.00,
-      prevClose: 45324.00,
-      volume: 0,
-      lastUpdate: new Date().toISOString()
+    techIndex: {
+      name: 'TECH INDEX',
+      value: 12456.89,
+      change: 89.34,
+      changePercent: 0.72,
+      high: 12489.12,
+      low: 12367.45,
+      volume: 3245896
     }
   });
 
-  const [stockData, setStockData] = useState({
-    'RELIANCE': {
-      name: 'Reliance Industries',
-      symbol: 'RELIANCE',
-      price: 2450.75,
-      change: 12.50,
-      changePercent: 0.51,
-      high: 2465.20,
-      low: 2438.30,
-      open: 2438.30,
-      prevClose: 2438.25,
-      volume: 2456789,
-      marketCap: 1658000000000,
-      pe: 24.5,
-      sector: 'Oil & Gas',
-      lastUpdate: new Date().toISOString()
+  const [marketNews, setMarketNews] = useState([
+    {
+      id: 1,
+      title: "StockForge Exchange Hits New All-Time High",
+      summary: "The gaming stock exchange reaches record levels as virtual companies show strong growth",
+      timestamp: new Date().toISOString(),
+      category: "Market",
+      importance: "high"
     },
-    'TCS': {
-      name: 'Tata Consultancy Services',
-      symbol: 'TCS',
-      price: 3250.20,
-      change: -8.30,
-      changePercent: -0.25,
-      high: 3268.50,
-      low: 3245.80,
-      open: 3258.50,
-      prevClose: 3258.50,
-      volume: 1234567,
-      marketCap: 1189000000000,
-      pe: 26.8,
-      sector: 'IT Services',
-      lastUpdate: new Date().toISOString()
+    {
+      id: 2,
+      title: "Tech Sector Shows Strong Performance",
+      summary: "Technology companies lead the market with consistent growth in Q2",
+      timestamp: new Date(Date.now() - 3600000).toISOString(),
+      category: "Sector",
+      importance: "medium"
     },
-    'INFY': {
-      name: 'Infosys Limited',
-      symbol: 'INFY',
-      price: 1420.45,
-      change: 15.20,
-      changePercent: 1.08,
-      high: 1425.60,
-      low: 1405.25,
-      open: 1405.25,
-      prevClose: 1405.25,
-      volume: 3456789,
-      marketCap: 587000000000,
-      pe: 22.3,
-      sector: 'IT Services',
-      lastUpdate: new Date().toISOString()
-    },
-    'HDFC': {
-      name: 'HDFC Bank',
-      symbol: 'HDFC',
-      price: 1580.90,
-      change: -5.10,
-      changePercent: -0.32,
-      high: 1586.00,
-      low: 1575.30,
-      open: 1586.00,
-      prevClose: 1586.00,
-      volume: 2987654,
-      marketCap: 873000000000,
-      pe: 18.7,
-      sector: 'Banking',
-      lastUpdate: new Date().toISOString()
-    },
-    'WIPRO': {
-      name: 'Wipro Limited',
-      symbol: 'WIPRO',
-      price: 385.60,
-      change: 4.20,
-      changePercent: 1.10,
-      high: 388.90,
-      low: 381.40,
-      open: 381.40,
-      prevClose: 381.40,
-      volume: 5432198,
-      marketCap: 198000000000,
-      pe: 24.1,
-      sector: 'IT Services',
-      lastUpdate: new Date().toISOString()
+    {
+      id: 3,
+      title: "New IPO Listings Expected This Week",
+      summary: "Several high-profile companies are planning to go public",
+      timestamp: new Date(Date.now() - 7200000).toISOString(),
+      category: "IPO",
+      importance: "high"
     }
+  ]);
+
+  const [marketVolatility, setMarketVolatility] = useState({
+    vix: 16.45, // Volatility Index
+    trend: 'stable', // stable, bullish, bearish
+    sentiment: 'positive' // positive, negative, neutral
   });
 
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [connectionStatus, setConnectionStatus] = useState('connected');
-  const [updateInterval, setUpdateInterval] = useState(5000); // 5 seconds
-
-  // Market timings (IST)
-  const marketTimings = {
-    preMarket: { start: '09:00', end: '09:15' },
-    regular: { start: '09:15', end: '15:30' },
-    postMarket: { start: '15:40', end: '16:00' }
-  };
-
-  // Check market status based on current time
+  // Check if market is open based on IST time
   const checkMarketStatus = useCallback(() => {
     const now = new Date();
-    const currentTime = now.toLocaleTimeString('en-IN', { 
-      hour12: false, 
-      timeZone: 'Asia/Kolkata' 
-    });
-    const currentDay = now.getDay(); // 0 = Sunday, 6 = Saturday
+    const istTime = new Date(now.toLocaleString("en-US", {timeZone: "Asia/Kolkata"}));
+    const currentHour = istTime.getHours();
+    const currentMinute = istTime.getMinutes();
+    const currentTime = currentHour * 60 + currentMinute;
     
-    // Check if it's a weekend
-    if (currentDay === 0 || currentDay === 6) {
-      return {
-        isOpen: false,
-        session: 'weekend',
-        nextSession: 'pre-market',
-        timeToNext: 0
-      };
-    }
-
-    const [hours, minutes] = currentTime.split(':').map(Number);
-    const currentMinutes = hours * 60 + minutes;
-
-    // Pre-market: 9:00 - 9:15
-    const preMarketStart = 9 * 60; // 540 minutes
-    const preMarketEnd = 9 * 60 + 15; // 555 minutes
-
-    // Regular market: 9:15 - 15:30
-    const marketStart = 9 * 60 + 15; // 555 minutes
-    const marketEnd = 15 * 60 + 30; // 930 minutes
-
-    // Post-market: 15:40 - 16:00
-    const postMarketStart = 15 * 60 + 40; // 940 minutes
-    const postMarketEnd = 16 * 60; // 960 minutes
-
-    if (currentMinutes >= preMarketStart && currentMinutes < preMarketEnd) {
-      return {
-        isOpen: true,
-        session: 'pre-market',
-        nextSession: 'regular',
-        timeToNext: (marketStart - currentMinutes) * 60000
-      };
-    } else if (currentMinutes >= marketStart && currentMinutes < marketEnd) {
-      return {
-        isOpen: true,
-        session: 'regular',
-        nextSession: 'post-market',
-        timeToNext: (postMarketStart - currentMinutes) * 60000
-      };
-    } else if (currentMinutes >= postMarketStart && currentMinutes < postMarketEnd) {
-      return {
-        isOpen: true,
-        session: 'post-market',
-        nextSession: 'closed',
-        timeToNext: (postMarketEnd - currentMinutes) * 60000
-      };
-    } else {
-      // Market is closed
-      let nextOpenTime;
-      if (currentMinutes < preMarketStart) {
-        // Before pre-market today
-        nextOpenTime = preMarketStart - currentMinutes;
-      } else {
-        // After post-market, next day
-        nextOpenTime = (24 * 60) - currentMinutes + preMarketStart;
-      }
-
-      return {
-        isOpen: false,
-        session: 'closed',
-        nextSession: 'pre-market',
-        timeToNext: nextOpenTime * 60000
-      };
-    }
+    // Market open: 9:15 AM to 3:30 PM IST (Monday to Friday)
+    const openTime = 9 * 60 + 15; // 9:15 AM
+    const closeTime = 15 * 60 + 30; // 3:30 PM
+    const dayOfWeek = istTime.getDay(); // 0 = Sunday, 6 = Saturday
+    
+    const isWeekday = dayOfWeek >= 1 && dayOfWeek <= 5;
+    const isInTradingHours = currentTime >= openTime && currentTime <= closeTime;
+    
+    const isOpen = isWeekday && isInTradingHours;
+    
+    setMarketStatus(prev => ({
+      ...prev,
+      isOpen,
+      currentTime: istTime.toTimeString().slice(0, 8),
+      nextOpen: isOpen ? null : getNextOpenTime(istTime),
+      nextClose: isOpen ? getNextCloseTime(istTime) : null
+    }));
   }, []);
 
-  // Initialize market status
-  useEffect(() => {
-    const status = checkMarketStatus();
-    setMarketStatus({
-      ...status,
-      lastUpdate: new Date().toISOString()
-    });
-    setLoading(false);
+  // Get next market open time
+  const getNextOpenTime = (currentTime) => {
+    const tomorrow = new Date(currentTime);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(9, 15, 0, 0);
     
-    console.log('📊 Market status initialized:', status);
-  }, [checkMarketStatus]);
+    // If tomorrow is weekend, move to Monday
+    if (tomorrow.getDay() === 0) { // Sunday
+      tomorrow.setDate(tomorrow.getDate() + 1);
+    } else if (tomorrow.getDay() === 6) { // Saturday
+      tomorrow.setDate(tomorrow.getDate() + 2);
+    }
+    
+    return tomorrow.toTimeString().slice(0, 8);
+  };
 
-  // Update market status every minute
-  useEffect(() => {
-    const statusInterval = setInterval(() => {
-      const status = checkMarketStatus();
-      setMarketStatus(prev => ({
-        ...prev,
-        ...status,
-        lastUpdate: new Date().toISOString()
-      }));
-    }, 60000); // Check every minute
-
-    return () => clearInterval(statusInterval);
-  }, [checkMarketStatus]);
+  // Get next market close time
+  const getNextCloseTime = (currentTime) => {
+    const closeTime = new Date(currentTime);
+    closeTime.setHours(15, 30, 0, 0);
+    return closeTime.toTimeString().slice(0, 8);
+  };
 
   // Simulate real-time market data updates
-  useEffect(() => {
-    if (!marketStatus.isOpen || marketStatus.session === 'closed') {
-      return;
-    }
-
-    const updateMarketData = () => {
-      try {
-        setConnectionStatus('connected');
+  const updateMarketData = useCallback(() => {
+    setIndices(prevIndices => {
+      const updatedIndices = { ...prevIndices };
+      
+      Object.keys(updatedIndices).forEach(key => {
+        const index = updatedIndices[key];
+        const changePercent = (Math.random() - 0.5) * 0.5; // ±0.25% change
+        const newValue = index.value * (1 + changePercent / 100);
+        const change = newValue - index.value;
         
-        // Update indices
-        setIndices(prev => {
-          const updated = { ...prev };
-          Object.keys(updated).forEach(key => {
-            const index = updated[key];
-            const volatility = marketStatus.session === 'regular' ? 0.5 : 0.2;
-            const changeAmount = (Math.random() - 0.5) * volatility;
-            const newValue = Math.max(index.value + changeAmount, index.value * 0.98);
-            const newChange = newValue - index.prevClose;
-            const newChangePercent = (newChange / index.prevClose) * 100;
+        updatedIndices[key] = {
+          ...index,
+          value: parseFloat(newValue.toFixed(2)),
+          change: parseFloat(change.toFixed(2)),
+          changePercent: parseFloat(changePercent.toFixed(2)),
+          volume: index.volume + Math.floor(Math.random() * 10000)
+        };
+      });
+      
+      return updatedIndices;
+    });
 
-            updated[key] = {
-              ...index,
-              value: parseFloat(newValue.toFixed(2)),
-              change: parseFloat(newChange.toFixed(2)),
-              changePercent: parseFloat(newChangePercent.toFixed(2)),
-              high: Math.max(index.high, newValue),
-              low: Math.min(index.low, newValue),
-              lastUpdate: new Date().toISOString()
-            };
-          });
-          return updated;
-        });
+    // Update market volatility
+    setMarketVolatility(prev => ({
+      ...prev,
+      vix: parseFloat((prev.vix + (Math.random() - 0.5) * 2).toFixed(2)),
+      trend: Math.random() > 0.7 ? 
+        (Math.random() > 0.5 ? 'bullish' : 'bearish') : 'stable'
+    }));
+  }, []);
 
-        // Update stock data
-        setStockData(prev => {
-          const updated = { ...prev };
-          Object.keys(updated).forEach(symbol => {
-            const stock = updated[symbol];
-            const volatility = marketStatus.session === 'regular' ? 2 : 0.8;
-            const changeAmount = (Math.random() - 0.5) * volatility;
-            const newPrice = Math.max(stock.price + changeAmount, stock.price * 0.95);
-            const newChange = newPrice - stock.prevClose;
-            const newChangePercent = (newChange / stock.prevClose) * 100;
-
-            // Simulate volume updates
-            const volumeIncrease = Math.floor(Math.random() * 10000);
-
-            updated[symbol] = {
-              ...stock,
-              price: parseFloat(newPrice.toFixed(2)),
-              change: parseFloat(newChange.toFixed(2)),
-              changePercent: parseFloat(newChangePercent.toFixed(2)),
-              high: Math.max(stock.high, newPrice),
-              low: Math.min(stock.low, newPrice),
-              volume: stock.volume + volumeIncrease,
-              lastUpdate: new Date().toISOString()
-            };
-          });
-          return updated;
-        });
-
-        setError(null);
-        
-      } catch (err) {
-        console.error('📊 Error updating market data:', err);
-        setError(err.message);
-        setConnectionStatus('error');
-      }
-    };
-
-    // Update immediately
-    updateMarketData();
-
-    // Set up interval for regular updates
-    const dataInterval = setInterval(updateMarketData, updateInterval);
-
-    return () => clearInterval(dataInterval);
-  }, [marketStatus.isOpen, marketStatus.session, updateInterval]);
-
-  // Get stock by symbol
-  const getStock = useCallback((symbol) => {
-    return stockData[symbol] || null;
-  }, [stockData]);
-
-  // Get index by symbol
-  const getIndex = useCallback((symbol) => {
-    return Object.values(indices).find(index => 
-      index.symbol === symbol || index.name.includes(symbol)
-    ) || null;
+  // Market analysis functions
+  const getMarketTrend = useCallback(() => {
+    const totalChange = Object.values(indices).reduce((sum, index) => sum + index.changePercent, 0);
+    const avgChange = totalChange / Object.keys(indices).length;
+    
+    if (avgChange > 0.5) return 'bullish';
+    if (avgChange < -0.5) return 'bearish';
+    return 'neutral';
   }, [indices]);
 
-  // Add stock to tracking
-  const addStock = useCallback((symbol, stockInfo) => {
-    setStockData(prev => ({
-      ...prev,
-      [symbol]: {
-        ...stockInfo,
-        lastUpdate: new Date().toISOString()
+  const getTopPerformers = useCallback(() => {
+    return Object.entries(indices)
+      .sort(([,a], [,b]) => b.changePercent - a.changePercent)
+      .slice(0, 3)
+      .map(([key, data]) => ({ key, ...data }));
+  }, [indices]);
+
+  const getWorstPerformers = useCallback(() => {
+    return Object.entries(indices)
+      .sort(([,a], [,b]) => a.changePercent - b.changePercent)
+      .slice(0, 3)
+      .map(([key, data]) => ({ key, ...data }));
+  }, [indices]);
+
+  // Market alerts system
+  const [marketAlerts, setMarketAlerts] = useState([]);
+
+  const addMarketAlert = useCallback((alert) => {
+    const newAlert = {
+      id: Date.now(),
+      timestamp: new Date().toISOString(),
+      ...alert
+    };
+    
+    setMarketAlerts(prev => [newAlert, ...prev.slice(0, 9)]); // Keep last 10 alerts
+  }, []);
+
+  // Check for significant market movements
+  const checkMarketAlerts = useCallback(() => {
+    Object.entries(indices).forEach(([key, index]) => {
+      if (Math.abs(index.changePercent) > 2) {
+        addMarketAlert({
+          type: index.changePercent > 0 ? 'surge' : 'drop',
+          title: `${index.name} ${index.changePercent > 0 ? 'Surges' : 'Drops'} ${Math.abs(index.changePercent).toFixed(1)}%`,
+          message: `${index.name} is showing significant movement with ${index.changePercent > 0 ? 'gains' : 'losses'} of ${Math.abs(index.changePercent).toFixed(2)}%`,
+          severity: Math.abs(index.changePercent) > 3 ? 'high' : 'medium',
+          index: key
+        });
       }
-    }));
-    
-    console.log('📊 Stock added to tracking:', symbol);
-  }, []);
-
-  // Remove stock from tracking
-  const removeStock = useCallback((symbol) => {
-    setStockData(prev => {
-      const updated = { ...prev };
-      delete updated[symbol];
-      return updated;
     });
+  }, [indices, addMarketAlert]);
+
+  // Trading session info
+  const getTradingSession = useCallback(() => {
+    const now = new Date();
+    const istTime = new Date(now.toLocaleString("en-US", {timeZone: "Asia/Kolkata"}));
+    const currentHour = istTime.getHours();
     
-    console.log('📊 Stock removed from tracking:', symbol);
-  }, []);
-
-  // Get market summary
-  const getMarketSummary = useCallback(() => {
-    const totalStocks = Object.keys(stockData).length;
-    const gainers = Object.values(stockData).filter(stock => stock.change > 0).length;
-    const losers = Object.values(stockData).filter(stock => stock.change < 0).length;
-    const unchanged = totalStocks - gainers - losers;
-
-    return {
-      totalStocks,
-      gainers,
-      losers,
-      unchanged,
-      advanceDeclineRatio: losers > 0 ? (gainers / losers).toFixed(2) : 'N/A'
-    };
-  }, [stockData]);
-
-  // Format market timing
-  const formatMarketTiming = useCallback((session) => {
-    const timing = marketTimings[session];
-    if (!timing) return 'N/A';
-    return `${timing.start} - ${timing.end} IST`;
-  }, []);
-
-  // Get time to next session
-  const getTimeToNextSession = useCallback(() => {
-    if (marketStatus.timeToNext <= 0) return 'N/A';
-    
-    const hours = Math.floor(marketStatus.timeToNext / (1000 * 60 * 60));
-    const minutes = Math.floor((marketStatus.timeToNext % (1000 * 60 * 60)) / (1000 * 60));
-    const seconds = Math.floor((marketStatus.timeToNext % (1000 * 60)) / 1000);
-    
-    if (hours > 0) {
-      return `${hours}h ${minutes}m`;
-    } else if (minutes > 0) {
-      return `${minutes}m ${seconds}s`;
+    if (currentHour >= 9 && currentHour < 12) {
+      return { session: 'morning', description: 'Morning Session' };
+    } else if (currentHour >= 12 && currentHour < 15) {
+      return { session: 'afternoon', description: 'Afternoon Session' };
+    } else if (currentHour >= 15 && currentHour <= 15.5) {
+      return { session: 'closing', description: 'Closing Session' };
     } else {
-      return `${seconds}s`;
-    }
-  }, [marketStatus.timeToNext]);
-
-  // Force data refresh
-  const refreshMarketData = useCallback(() => {
-    setLoading(true);
-    setError(null);
-    
-    // Simulate API call
-    setTimeout(() => {
-      const status = checkMarketStatus();
-      setMarketStatus({
-        ...status,
-        lastUpdate: new Date().toISOString()
-      });
-      setLoading(false);
-      
-      console.log('🔄 Market data refreshed');
-      
-      // Dispatch refresh event
-      window.dispatchEvent(new CustomEvent('stockforge:market_refreshed', {
-        detail: { timestamp: new Date().toISOString() }
-      }));
-    }, 1000);
-  }, [checkMarketStatus]);
-
-  // Set update frequency
-  const setUpdateFrequency = useCallback((frequency) => {
-    const frequencies = {
-      'fast': 1000,
-      'normal': 5000,
-      'slow': 10000
-    };
-    
-    if (frequencies[frequency]) {
-      setUpdateInterval(frequencies[frequency]);
-      console.log('📊 Update frequency changed to:', frequency);
+      return { session: 'closed', description: 'Market Closed' };
     }
   }, []);
 
+  // Market stats
+  const getMarketStats = useCallback(() => {
+    const totalVolume = Object.values(indices).reduce((sum, index) => sum + index.volume, 0);
+    const avgChange = Object.values(indices).reduce((sum, index) => sum + index.changePercent, 0) / Object.keys(indices).length;
+    
+    return {
+      totalVolume,
+      avgChange: parseFloat(avgChange.toFixed(2)),
+      activeIndices: Object.keys(indices).length,
+      marketCap: '₹2,45,678 Cr', // Simulated total market cap
+      tradingSession: getTradingSession()
+    };
+  }, [indices, getTradingSession]);
+
+  // Initialize market data
+  useEffect(() => {
+    checkMarketStatus();
+    
+    // Update market status every minute
+    const statusInterval = setInterval(checkMarketStatus, 60000);
+    
+    // Update market data every 5 seconds when market is open
+    const dataInterval = setInterval(() => {
+      if (marketStatus.isOpen) {
+        updateMarketData();
+      }
+    }, 5000);
+    
+    // Check for alerts every 30 seconds
+    const alertInterval = setInterval(checkMarketAlerts, 30000);
+    
+    return () => {
+      clearInterval(statusInterval);
+      clearInterval(dataInterval);
+      clearInterval(alertInterval);
+    };
+  }, [checkMarketStatus, updateMarketData, checkMarketAlerts, marketStatus.isOpen]);
+
+  // Market context value
   const value = {
-    // State
+    // Market status and timing
     marketStatus,
+    checkMarketStatus,
+    getTradingSession,
+    
+    // Market indices and data
     indices,
-    stockData,
-    loading,
-    error,
-    connectionStatus,
-    updateInterval,
-
-    // Market timings
-    marketTimings,
-
-    // Functions
-    getStock,
-    getIndex,
-    addStock,
-    removeStock,
-    getMarketSummary,
-    formatMarketTiming,
-    getTimeToNextSession,
-    refreshMarketData,
-    setUpdateFrequency,
-    checkMarketStatus
+    updateMarketData,
+    getMarketTrend,
+    getTopPerformers,
+    getWorstPerformers,
+    
+    // Market news and alerts
+    marketNews,
+    setMarketNews,
+    marketAlerts,
+    addMarketAlert,
+    
+    // Market analysis
+    marketVolatility,
+    getMarketStats,
+    
+    // Utility functions
+    formatCurrency: (amount) => {
+      return new Intl.NumberFormat('en-IN', {
+        style: 'currency',
+        currency: 'INR',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+      }).format(amount);
+    },
+    
+    formatNumber: (num) => {
+      if (num >= 10000000) return `₹${(num / 10000000).toFixed(1)}Cr`;
+      if (num >= 100000) return `₹${(num / 100000).toFixed(1)}L`;
+      if (num >= 1000) return `₹${(num / 1000).toFixed(1)}K`;
+      return `₹${num}`;
+    },
+    
+    formatPercentage: (percent) => {
+      return `${percent >= 0 ? '+' : ''}${percent.toFixed(2)}%`;
+    }
   };
 
   return (
