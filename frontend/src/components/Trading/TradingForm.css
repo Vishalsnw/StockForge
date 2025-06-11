@@ -1,0 +1,465 @@
+.trading-form-container {
+  background: #1a1a1a;
+  border-radius: 12px;
+  border: 1px solid #333;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.order-type-toggle {
+  display: flex;
+  margin: 20px;
+  margin-bottom: 15px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #333;
+}
+
+.toggle-btn {
+  flex: 1;
+  padding: 12px 20px;
+  border: none;
+  background: #2d2d2d;
+  color: #ccc;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.toggle-btn:first-child {
+  border-right: 1px solid #333;
+}
+
+.toggle-btn.active.buy {
+  background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+}
+
+.toggle-btn.active.sell {
+  background: linear-gradient(135deg, #f44336 0%, #c62828 100%);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(244, 67, 54, 0.3);
+}
+
+.toggle-btn:hover:not(.active) {
+  background: #3d3d3d;
+  color: #ffffff;
+}
+
+.balance-info {
+  margin: 0 20px 20px 20px;
+  padding: 15px;
+  background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 100%);
+  border-radius: 8px;
+  border: 1px solid #333;
+}
+
+.balance-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 0;
+}
+
+.balance-item:not(:last-child) {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+}
+
+.balance-item .label {
+  font-size: 12px;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.balance-item .value {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a73e8;
+  font-family: 'Courier New', monospace;
+}
+
+.trading-form {
+  flex: 1;
+  padding: 0 20px;
+  overflow-y: auto;
+}
+
+.trading-form h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #ffffff;
+  margin-bottom: 20px;
+  text-align: center;
+  padding: 15px;
+  background: linear-gradient(135deg, #2d2d2d 0%, #1a1a1a 100%);
+  border-radius: 8px;
+  border: 1px solid #333;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #ccc;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.form-input,
+.form-select {
+  width: 100%;
+  padding: 12px 15px;
+  background: #2d2d2d;
+  border: 1px solid #333;
+  border-radius: 6px;
+  color: #ffffff;
+  font-size: 14px;
+  font-family: 'Courier New', monospace;
+  transition: all 0.3s ease;
+}
+
+.form-input:focus,
+.form-select:focus {
+  outline: none;
+  border-color: #1a73e8;
+  box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2);
+  background: #3d3d3d;
+}
+
+.form-input::placeholder {
+  color: #888;
+  font-family: inherit;
+}
+
+.form-select {
+  cursor: pointer;
+}
+
+.form-select option {
+  background: #2d2d2d;
+  color: #ffffff;
+}
+
+.quick-quantity {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.quick-qty-btn {
+  flex: 1;
+  padding: 8px 12px;
+  background: #0f0f0f;
+  border: 1px solid #333;
+  border-radius: 4px;
+  color: #ccc;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.quick-qty-btn:hover {
+  background: #1a73e8;
+  color: #ffffff;
+  border-color: #1a73e8;
+  transform: translateY(-1px);
+}
+
+.order-preview {
+  background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 100%);
+  border: 1px solid #333;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 20px;
+}
+
+.order-preview h4 {
+  font-size: 14px;
+  font-weight: 600;
+  color: #ffffff;
+  margin-bottom: 15px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.preview-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+  font-size: 13px;
+}
+
+.preview-row:not(:last-child) {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.preview-row span:first-child {
+  color: #888;
+}
+
+.preview-row span:last-child {
+  color: #ffffff;
+  font-weight: 600;
+  font-family: 'Courier New', monospace;
+}
+
+.preview-row.total {
+  margin-top: 10px;
+  padding-top: 15px;
+  border-top: 2px solid #333;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.preview-row.total span:last-child {
+  color: #1a73e8;
+  font-size: 16px;
+}
+
+.submit-btn {
+  width: 100%;
+  padding: 15px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.submit-btn.buy {
+  background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+}
+
+.submit-btn.buy:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+}
+
+.submit-btn.sell {
+  background: linear-gradient(135deg, #f44336 0%, #c62828 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 15px rgba(244, 67, 54, 0.3);
+}
+
+.submit-btn.sell:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(244, 67, 54, 0.4);
+}
+
+.recent-orders {
+  border-top: 1px solid #333;
+  background: #0f0f0f;
+  padding: 20px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.recent-orders h4 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #ffffff;
+  margin-bottom: 15px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.orders-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.order-item {
+  background: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 6px;
+  padding: 12px;
+  transition: all 0.2s ease;
+}
+
+.order-item:hover {
+  border-color: #1a73e8;
+  transform: translateY(-1px);
+}
+
+.order-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.order-type {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.order-type.buy {
+  background: rgba(76, 175, 80, 0.2);
+  color: #4caf50;
+}
+
+.order-type.sell {
+  background: rgba(244, 67, 54, 0.2);
+  color: #f44336;
+}
+
+.order-symbol {
+  font-size: 14px;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.order-status {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.order-details {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+}
+
+.order-details span:first-child {
+  color: #ccc;
+  font-family: 'Courier New', monospace;
+}
+
+.order-time {
+  color: #888;
+  font-family: 'Courier New', monospace;
+}
+
+/* Scrollbar Styling */
+.trading-form::-webkit-scrollbar,
+.recent-orders::-webkit-scrollbar {
+  width: 4px;
+}
+
+.trading-form::-webkit-scrollbar-track,
+.recent-orders::-webkit-scrollbar-track {
+  background: #1a1a1a;
+}
+
+.trading-form::-webkit-scrollbar-thumb,
+.recent-orders::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 2px;
+}
+
+.trading-form::-webkit-scrollbar-thumb:hover,
+.recent-orders::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .trading-form-container {
+    margin: 10px;
+  }
+  
+  .order-type-toggle,
+  .balance-info,
+  .trading-form {
+    margin: 15px;
+  }
+  
+  .recent-orders {
+    padding: 15px;
+  }
+  
+  .quick-quantity {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+  }
+  
+  .quick-qty-btn {
+    padding: 6px 10px;
+    font-size: 11px;
+  }
+  
+  .submit-btn {
+    padding: 12px 15px;
+    font-size: 14px;
+  }
+  
+  .order-header {
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+  
+  .balance-item {
+    font-size: 12px;
+  }
+}
+
+/* Loading animation for submit button */
+@keyframes submitLoading {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.submit-btn:disabled {
+  background: linear-gradient(270deg, #333, #555, #333);
+  background-size: 200% 200%;
+  animation: submitLoading 2s ease infinite;
+}
+
+/* Success/Error states */
+.form-input.error {
+  border-color: #f44336;
+  box-shadow: 0 0 0 2px rgba(244, 67, 54, 0.2);
+}
+
+.form-input.success {
+  border-color: #4caf50;
+  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+}
+
+/* Tooltip for price suggestions */
+.price-suggestion {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 11px;
+  color: #888;
+  pointer-events: none;
+}
