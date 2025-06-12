@@ -545,7 +545,7 @@ export const useBotMarket = () => {
         utc: getCurrentTime(),
         est: getCurrentESTTime(),
         marketOpen: getMarketCondition() === 'regular',
-        tradingDay: currentDate
+        tradingDay: sessionStartTime.split(' ')[0]
       }
     };
     
@@ -1129,7 +1129,7 @@ export const useBotMarket = () => {
         marketCondition: getMarketCondition(),
         trend: 'flat',
         momentum: 'neutral',
-        initializedAt: currentDateTimeUTC,
+        initializedAt: getCurrentTime(),
         initializedFor: currentUser
       };
       
@@ -1144,7 +1144,7 @@ export const useBotMarket = () => {
     console.log(`   • Base quotes generated at ${SESSION_START_TIME} UTC`);
     console.log(`   • Ready for market engine start`);
     
-  }, [companies, currentUser, currentDateTimeUTC, getMarketCondition, getCurrentTime]);
+  }, [companies, currentUser, getCurrentTime(), getMarketCondition, getCurrentTime]);
 
   // ===== RETURN HOOK API FOR VISHALSNW =====
   const hookAPI = {
@@ -1186,7 +1186,7 @@ export const useBotMarket = () => {
     currentUser,
     sessionStartTime: SESSION_START_TIME,
     buildTime: BUILD_VERSION,
-    currentTime: currentDateTimeUTC,
+    currentTime: getCurrentTime(),
     
     // ===== MARKET CONFIG =====
     config: MARKET_CONFIG,
