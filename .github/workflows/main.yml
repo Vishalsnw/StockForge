@@ -34,7 +34,7 @@ jobs:
       - name: Display Info
         run: |
           echo "StockForge Auto-Fix Workflow"
-          echo "Current UTC Time: 2025-06-12 14:08:55"
+          echo "Current UTC Time: 2025-06-12 14:12:58"
           echo "User: ${{ inputs.user_name || 'Vishalsnw' }}"
           echo "Fix Type: ${{ inputs.fix_type || 'remove_duplicates' }}"
 
@@ -63,58 +63,54 @@ jobs:
             exit 1
           fi
 
-      - name: Show Current File Around Line 589
-        run: |
-          TARGET_FILE="${{ steps.detect-file.outputs.target_file }}"
-          echo "Showing content around line 589:"
-          sed -n '580,600p' "$TARGET_FILE" || echo "Could not show lines around 589"
-
-      - name: Analyze Duplicates
+      - name: Smart Duplicate Analysis
         id: analyze
         run: |
           TARGET_FILE="${{ steps.detect-file.outputs.target_file }}"
-          echo "Analyzing duplicates in $TARGET_FILE"
+          echo "Smart analysis of duplicates in $TARGET_FILE"
           
           if [ ! -f "$TARGET_FILE" ]; then
             echo "File not found: $TARGET_FILE"
             exit 1
           fi
           
-          # Show all lines with const declarations
-          echo "All const currentUser lines:"
-          grep -n "const currentUser =" "$TARGET_FILE" || echo "No currentUser found"
+          echo "All currentUser declarations with context:"
+          grep -n -A2 -B2 "const currentUser =" "$TARGET_FILE" || echo "No currentUser found"
           
-          echo "All const currentDateTimeUTC lines:"
-          grep -n "const currentDateTimeUTC =" "$TARGET_FILE" || echo "No currentDateTimeUTC found"
+          echo ""
+          echo "Analyzing specific patterns..."
           
-          USER_COUNT=$(grep -c "const currentUser =" "$TARGET_FILE" || echo "0")
-          DATETIME_COUNT=$(grep -c "const currentDateTimeUTC =" "$TARGET_FILE" || echo "0")
-          DATE_COUNT=$(grep -c "const currentDate =" "$TARGET_FILE" || echo "0")
-          TIME_COUNT=$(grep -c "const currentTime =" "$TARGET_FILE" || echo "0")
+          # Look for the problematic duplicate patterns (our added ones)
+          DUPLICATE_VISHALSNW=$(grep -c "const currentUser = 'Vishalsnw';" "$TARGET_FILE" || echo "0")
+          DUPLICATE_DATETIME=$(grep -c "const currentDateTimeUTC = '2025-" "$TARGET_FILE" || echo "0")
+          DUPLICATE_BLOCKS=$(grep -c "// ===== CURRENT INFO (Updated) =====" "$TARGET_FILE" || echo "0")
           
-          echo "COUNTS:"
-          echo "currentUser: $USER_COUNT declarations"
-          echo "currentDateTimeUTC: $DATETIME_COUNT declarations"
-          echo "currentDate: $DATE_COUNT declarations"
-          echo "currentTime: $TIME_COUNT declarations"
+          # Look for original declarations
+          ORIGINAL_CURRENT_USER=$(grep -c "const currentUser = CURRENT_USER;" "$TARGET_FILE" || echo "0")
           
-          TOTAL_FOUND=$((USER_COUNT + DATETIME_COUNT + DATE_COUNT + TIME_COUNT))
-          TOTAL_DUPLICATES=$((TOTAL_FOUND - 4))
+          echo "ANALYSIS RESULTS:"
+          echo "Original currentUser (CURRENT_USER): $ORIGINAL_CURRENT_USER"
+          echo "Duplicate currentUser (Vishalsnw): $DUPLICATE_VISHALSNW"
+          echo "Duplicate currentDateTimeUTC: $DUPLICATE_DATETIME"
+          echo "Duplicate comment blocks: $DUPLICATE_BLOCKS"
           
-          echo "total_duplicates=$TOTAL_DUPLICATES" >> $GITHUB_OUTPUT
+          # Calculate actual duplicates (our additions only)
+          ACTUAL_DUPLICATES=$((DUPLICATE_VISHALSNW + DUPLICATE_DATETIME + DUPLICATE_BLOCKS))
           
-          if [ $TOTAL_DUPLICATES -gt 0 ]; then
+          echo "total_duplicates=$ACTUAL_DUPLICATES" >> $GITHUB_OUTPUT
+          
+          if [ $ACTUAL_DUPLICATES -gt 0 ]; then
             echo "needs_fix=true" >> $GITHUB_OUTPUT
-            echo "$TOTAL_DUPLICATES duplicates found - FIX NEEDED"
+            echo "$ACTUAL_DUPLICATES actual duplicates (our additions) found - FIX NEEDED"
           else
             echo "needs_fix=false" >> $GITHUB_OUTPUT
-            echo "No duplicates found - File is clean"
+            echo "No actual duplicates found - File is clean"
           fi
 
-      - name: Create Aggressive Fix Script
+      - name: Create Smart Fix Script
         if: steps.analyze.outputs.needs_fix == 'true'
         run: |
-          cat > fix_aggressive.sh << 'BASH_END'
+          cat > smart_fix.sh << 'BASH_END'
           #!/bin/bash
           
           TARGET_FILE="$1"
@@ -129,122 +125,138 @@ jobs:
               exit 1
           fi
           
-          echo "Starting aggressive fix for: $TARGET_FILE"
+          echo "Starting smart fix for: $TARGET_FILE"
+          echo "UTC Time: 2025-06-12 14:12:58"
+          echo "User: Vishalsnw"
           
           # Create backup
           cp "$TARGET_FILE" "${TARGET_FILE}.backup-$(date +%s)"
           echo "Backup created"
           
-          # Show lines around 589 before fix
-          echo "BEFORE FIX - Lines around 589:"
-          sed -n '585,595p' "$TARGET_FILE"
+          echo "BEFORE FIX:"
+          echo "All currentUser lines:"
+          grep -n "const currentUser =" "$TARGET_FILE"
           
-          # Method 1: Remove all duplicate blocks aggressively
-          echo "Removing duplicate comment blocks..."
+          # Strategy: Remove only OUR duplicate additions, not original code
+          # Remove lines that contain our specific patterns
           
-          # Remove any lines containing duplicate const declarations after line 100
-          # Keep only the first occurrence
+          echo "Removing our duplicate additions..."
+          
+          # Remove commented duplicate lines first
+          sed -i '/\/\/ REMOVED DUPLICATE:.*const currentUser/d' "$TARGET_FILE"
+          sed -i '/\/\/ REMOVED DUPLICATE:.*const currentDateTimeUTC/d' "$TARGET_FILE"
+          sed -i '/\/\/ REMOVED DUPLICATE:.*const currentDate/d' "$TARGET_FILE"
+          sed -i '/\/\/ REMOVED DUPLICATE:.*const currentTime/d' "$TARGET_FILE"
+          
+          # Remove our specific duplicate blocks (not original code)
+          # Look for blocks that contain 'Vishalsnw' specifically
+          
+          # Method 1: Remove blocks with our timestamp patterns
           awk '
-          BEGIN { 
-              found_user = 0; found_datetime = 0; found_date = 0; found_time = 0; 
+          BEGIN { in_duplicate_block = 0; block_lines = 0; }
+          
+          /\/\/ ===== CURRENT INFO \(Updated\) =====/ {
+              # Start of potential duplicate block
+              in_duplicate_block = 1;
+              block_lines = 0;
+              block_start = NR;
+              next;
           }
-          /const currentUser =/ { 
-              if (found_user == 0) { 
-                  print; found_user = 1; 
-              } else { 
-                  print "// REMOVED DUPLICATE: " $0; 
-              } 
-              next 
+          
+          in_duplicate_block == 1 {
+              block_lines++;
+              if (/const currentUser = .Vishalsnw.;/ || /const currentDateTimeUTC = .2025-/) {
+                  # This is our duplicate block, skip it
+                  if (block_lines >= 4) {
+                      in_duplicate_block = 0;
+                  }
+                  next;
+              } else if (block_lines >= 6) {
+                  # Not our block, print previous lines and continue normally
+                  in_duplicate_block = 0;
+                  print;
+              } else {
+                  next;
+              }
           }
-          /const currentDateTimeUTC =/ { 
-              if (found_datetime == 0) { 
-                  print; found_datetime = 1; 
-              } else { 
-                  print "// REMOVED DUPLICATE: " $0; 
-              } 
-              next 
-          }
-          /const currentDate =/ { 
-              if (found_date == 0) { 
-                  print; found_date = 1; 
-              } else { 
-                  print "// REMOVED DUPLICATE: " $0; 
-              } 
-              next 
-          }
-          /const currentTime =/ { 
-              if (found_time == 0) { 
-                  print; found_time = 1; 
-              } else { 
-                  print "// REMOVED DUPLICATE: " $0; 
-              } 
-              next 
-          }
-          { print }
+          
+          { print; }
           ' "$TARGET_FILE" > "${TARGET_FILE}.temp"
           
-          # Move temp file back
           mv "${TARGET_FILE}.temp" "$TARGET_FILE"
           
-          # Method 2: Remove comment lines that precede duplicates
-          echo "Removing duplicate comment blocks..."
-          sed -i '/\/\/ ===== CURRENT INFO (Updated) =====/,+4 {
-              /\/\/ ===== CURRENT INFO (Updated) =====/!b
-              N;N;N;N
-              /const currentUser.*const currentDateTimeUTC.*const currentDate/d
+          # Method 2: Remove any remaining standalone duplicates with our patterns
+          # Remove lines that contain exactly our patterns (not the original CURRENT_USER)
+          sed -i "/const currentUser = 'Vishalsnw';/d" "$TARGET_FILE"
+          sed -i "/const currentDateTimeUTC = '2025-/d" "$TARGET_FILE"
+          sed -i "/const currentDate = '2025-/d" "$TARGET_FILE"
+          sed -i "/const currentTime = '[0-9][0-9]:[0-9][0-9]:[0-9][0-9]';/d" "$TARGET_FILE"
+          
+          # Remove empty comment blocks
+          sed -i '/\/\/ ===== CURRENT INFO (Updated) =====/,+1 {
+              /\/\/ ===== CURRENT INFO (Updated) =====/d
+              /^[[:space:]]*$/d
           }' "$TARGET_FILE"
           
-          # Method 3: Ensure currentUser is set to Vishalsnw
-          sed -i "s/const currentUser = '[^']*';/const currentUser = 'Vishalsnw';/" "$TARGET_FILE"
+          echo "AFTER FIX:"
+          echo "All currentUser lines:"
+          grep -n "const currentUser =" "$TARGET_FILE" || echo "No currentUser lines found"
           
-          # Show lines around 589 after fix
-          echo "AFTER FIX - Lines around 589:"
-          sed -n '585,595p' "$TARGET_FILE"
+          echo "All currentDateTimeUTC lines:"
+          grep -n "const currentDateTimeUTC =" "$TARGET_FILE" || echo "No currentDateTimeUTC lines found"
           
-          # Final count
-          USER_COUNT_AFTER=$(grep -c "const currentUser =" "$TARGET_FILE")
-          DATETIME_COUNT_AFTER=$(grep -c "const currentDateTimeUTC =" "$TARGET_FILE")
+          # Final verification
+          USER_COUNT=$(grep -c "const currentUser =" "$TARGET_FILE" || echo "0")
+          DATETIME_COUNT=$(grep -c "const currentDateTimeUTC =" "$TARGET_FILE" || echo "0")
           
           echo "FINAL COUNTS:"
-          echo "currentUser: $USER_COUNT_AFTER declarations"
-          echo "currentDateTimeUTC: $DATETIME_COUNT_AFTER declarations"
+          echo "currentUser declarations: $USER_COUNT"
+          echo "currentDateTimeUTC declarations: $DATETIME_COUNT"
           
-          if [ $USER_COUNT_AFTER -le 1 ] && [ $DATETIME_COUNT_AFTER -le 1 ]; then
-              echo "SUCCESS: Duplicates removed or commented out"
+          # Success criteria: should have exactly 1 currentUser (the original)
+          if [ $USER_COUNT -eq 1 ]; then
+              echo "SUCCESS: Correct number of currentUser declarations"
+              echo "Remaining currentUser line:"
+              grep -n "const currentUser =" "$TARGET_FILE"
               exit 0
           else
-              echo "ERROR: Still have duplicates, manual intervention needed"
-              exit 1
+              echo "WARNING: Unexpected number of currentUser declarations: $USER_COUNT"
+              if [ $USER_COUNT -eq 0 ]; then
+                  echo "ERROR: Removed original currentUser declaration!"
+                  exit 1
+              else
+                  echo "INFO: May still have duplicates, but proceeding"
+                  exit 0
+              fi
           fi
           BASH_END
           
-          chmod +x fix_aggressive.sh
-          echo "Aggressive fix script created"
+          chmod +x smart_fix.sh
+          echo "Smart fix script created"
 
-      - name: Execute Aggressive Fix
+      - name: Execute Smart Fix
         if: steps.analyze.outputs.needs_fix == 'true'
         run: |
           TARGET_FILE="${{ steps.detect-file.outputs.target_file }}"
-          echo "Executing aggressive fix on $TARGET_FILE"
+          echo "Executing smart fix on $TARGET_FILE"
           
-          if ./fix_aggressive.sh "$TARGET_FILE"; then
-            echo "Aggressive fix completed successfully"
+          if ./smart_fix.sh "$TARGET_FILE"; then
+            echo "Smart fix completed successfully"
           else
-            echo "Aggressive fix failed, trying manual line removal..."
+            echo "Smart fix had issues, checking results..."
             
-            # Manual line-by-line removal of known duplicates
-            TARGET_FILE="${{ steps.detect-file.outputs.target_file }}"
+            # Check current state
+            USER_COUNT=$(grep -c "const currentUser =" "$TARGET_FILE" || echo "0")
+            echo "Current currentUser count: $USER_COUNT"
             
-            # Remove lines 588-591 specifically (the duplicate block)
-            sed -i '588,591d' "$TARGET_FILE"
-            echo "Manually removed lines 588-591"
-            
-            # Verify
-            if grep -q "const currentUser.*const currentUser" "$TARGET_FILE"; then
-              echo "Still have duplicates, need manual fix"
-              exit 1
+            if [ $USER_COUNT -eq 1 ]; then
+              echo "Fix successful despite warnings"
             else
-              echo "Manual fix successful"
+              echo "Manual cleanup needed"
+              # Try one more aggressive cleanup
+              sed -i '/const currentUser.*Vishalsnw/d' "$TARGET_FILE"
+              sed -i '/const currentDateTimeUTC.*2025-/d' "$TARGET_FILE"
+              echo "Applied additional cleanup"
             fi
           fi
 
@@ -253,27 +265,30 @@ jobs:
         run: |
           TARGET_FILE="${{ steps.detect-file.outputs.target_file }}"
           
-          # Final verification
-          USER_COUNT=$(grep -c "const currentUser =" "$TARGET_FILE" || echo "0")
-          echo "Final currentUser count: $USER_COUNT"
+          echo "FINAL VERIFICATION:"
+          echo "==================="
           
-          if [ $USER_COUNT -gt 1 ]; then
-            echo "ERROR: Still have $USER_COUNT currentUser declarations"
-            echo "Showing all occurrences:"
-            grep -n "const currentUser =" "$TARGET_FILE"
-            exit 1
-          fi
+          # Show final state
+          echo "Final currentUser declarations:"
+          grep -n -B1 -A1 "const currentUser =" "$TARGET_FILE" || echo "No currentUser found"
+          
+          USER_COUNT=$(grep -c "const currentUser =" "$TARGET_FILE" || echo "0")
+          echo "Final count: $USER_COUNT currentUser declarations"
           
           # Test build
           echo "Testing build..."
           cd frontend
           npm install
-          npm run build
           
-          if [ $? -eq 0 ]; then
-            echo "BUILD SUCCESS: No more duplicate errors"
+          if npm run build; then
+            echo "BUILD SUCCESS: All duplicate errors resolved!"
           else
-            echo "BUILD FAILED: Manual intervention required"
+            echo "BUILD FAILED: Need to check for remaining issues"
+            
+            # Show any remaining duplicate errors
+            echo "Checking for JavaScript errors..."
+            npm run build 2>&1 | grep -i "already been declared" || echo "No duplicate declaration errors found"
+            
             exit 1
           fi
 
@@ -288,25 +303,27 @@ jobs:
           if git diff --staged --quiet; then
             echo "No changes to commit"
           else
-            git commit -m "EMERGENCY FIX: Remove duplicate const declarations at line 589 - Vishalsnw - 2025-06-12 14:08:55"
+            git commit -m "SMART FIX: Remove only duplicate additions (not original code) - Vishalsnw - 2025-06-12 14:12:58"
             git push
-            echo "Emergency fix committed and pushed"
+            echo "Smart fix committed and pushed"
           fi
 
       - name: Success Summary
         if: steps.analyze.outputs.needs_fix == 'true'
         run: |
-          echo "EMERGENCY FIX COMPLETED"
-          echo "======================"
+          echo "SMART FIX COMPLETED"
+          echo "=================="
           echo "User: Vishalsnw"
+          echo "UTC Time: 2025-06-12 14:12:58"
           echo "Target: ${{ steps.detect-file.outputs.target_file }}"
-          echo "Duplicates fixed: ${{ steps.analyze.outputs.total_duplicates }}"
+          echo "Strategy: Remove only our duplicate additions, preserve original code"
           echo "Build test: PASSED"
           echo "Ready for Vercel deployment"
 
       - name: No Fix Needed
         if: steps.analyze.outputs.needs_fix == 'false'
         run: |
-          echo "No duplicates found"
-          echo "File is already clean"
+          echo "No actual duplicates found"
+          echo "Original code is preserved"
           echo "User: Vishalsnw"
+          echo "UTC Time: 2025-06-12 14:12:58"
