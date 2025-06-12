@@ -1,4 +1,4 @@
-name: Fix App Import Issue
+name: Fix JSX Extension Issue
 
 on:
   workflow_dispatch:
@@ -10,56 +10,71 @@ on:
         type: string
 
 jobs:
-  fix-app-import:
-    name: Fix App Import
+  fix-jsx-extension:
+    name: Fix JSX Extension
     runs-on: ubuntu-latest
     
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Fix main.jsx Import
+      - name: Rename App.js to App.jsx
         run: |
-          echo "Fixing main.jsx import path..."
+          echo "Renaming App.js to App.jsx..."
           
-          # Change import from App.jsx to App.js in main.jsx
-          sed -i "s|import App from './App.jsx'|import App from './App.js'|g" frontend/src/main.jsx
+          # Rename the file
+          mv frontend/src/App.js frontend/src/App.jsx
           
-          echo "Import path fixed in main.jsx"
+          echo "File renamed successfully"
 
-      - name: Verify Files
+      - name: Update main.jsx Import
         run: |
-          echo "Checking App files..."
+          echo "Updating main.jsx import..."
+          
+          # Update import in main.jsx to use .jsx extension
+          sed -i "s|import App from './App.js'|import App from './App.jsx'|g" frontend/src/main.jsx
+          
+          echo "Import updated in main.jsx"
+
+      - name: Verify Changes
+        run: |
+          echo "Checking files..."
           ls -la frontend/src/App.*
           
-          echo "Checking main.jsx content..."
+          echo "Checking main.jsx import..."
           grep -n "import App" frontend/src/main.jsx
 
-      - name: Commit Fix
+      - name: Test Build
+        run: |
+          cd frontend
+          npm install
+          npm run build
+
+      - name: Commit Changes
         run: |
           git config user.email "action@github.com"
           git config user.name "Bot"
           
-          git add frontend/src/main.jsx
+          git add .
           
           if ! git diff --staged --quiet; then
-            git commit -m "Fix: Change App import from .jsx to .js - Vishalsnw - 2025-06-12 15:10:00"
+            git commit -m "Fix: Rename App.js to App.jsx for JSX syntax - Vishalsnw - 2025-06-12 15:15:06"
             git push
-            echo "App import fixed and pushed"
+            echo "Changes committed and pushed"
           else
-            echo "No changes needed"
+            echo "No changes to commit"
           fi
 
       - name: Success Summary
         run: |
-          echo "APP IMPORT FIX COMPLETED"
-          echo "======================="
+          echo "JSX EXTENSION FIX COMPLETED"
+          echo "=========================="
           echo "User: Vishalsnw"
-          echo "Time: 2025-06-12 15:10:00 UTC"
+          echo "Time: 2025-06-12 15:15:06 UTC"
           echo ""
-          echo "Fix Applied:"
-          echo "- Changed main.jsx import from App.jsx to App.js"
-          echo "- This will load the correct App component with routing"
-          echo "- Should resolve blank screen issue"
+          echo "Fixes Applied:"
+          echo "- Renamed App.js → App.jsx"
+          echo "- Updated main.jsx import to use .jsx"
+          echo "- Build should now work with JSX syntax"
           echo ""
-          echo "App should now load properly!"
+          echo "Deployment should succeed now!"
