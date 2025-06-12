@@ -585,12 +585,7 @@ export const useBotMarket = () => {
   // ===== STOCKFORGE MARKET GAME ENGINE - PART 6/8 =====
 // ===== ENGINE CONTROL FUNCTIONS =====
 
-  // ===== CURRENT INFO (Updated) =====
-  const currentUser = 'Vishalsnw';
-  const currentDateTimeUTC = '2025-06-11 21:22:11';
-  const currentDate = '2025-06-11';
-  const currentTime = '21:22:11';
-
+  // ===== ENGINE CONTROL FUNCTIONS =====
   // ===== ENGINE CONTROL FUNCTIONS =====
   
   // Start the market engine for Vishalsnw
@@ -800,12 +795,7 @@ export const useBotMarket = () => {
   // ===== STOCKFORGE MARKET GAME ENGINE - PART 7/8 =====
 // ===== DATA ACCESS FUNCTIONS =====
 
-  // ===== CURRENT INFO (Updated) =====
-  const currentUser = 'Vishalsnw';
-  const currentDateTimeUTC = '2025-06-11 21:23:34';
-  const currentDate = '2025-06-11';
-  const currentTime = '21:23:34';
-
+  // ===== DATA ACCESS FUNCTIONS =====
   // ===== DATA ACCESS FUNCTIONS =====
   
   // Get specific quote by ticker symbol for Vishalsnw
@@ -1087,10 +1077,6 @@ export const useBotMarket = () => {
 // ===== HOOK RETURN & CLEANUP =====
 
   // ===== CURRENT INFO (Final Update) =====
-  const currentUser = 'Vishalsnw';
-  const currentDateTimeUTC = '2025-06-11 21:25:18';
-  const currentDate = '2025-06-11';
-  const currentTime = '21:25:18';
 
   // ===== CLEANUP & LIFECYCLE MANAGEMENT =====
   
