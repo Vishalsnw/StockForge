@@ -1,4 +1,4 @@
-name: Fix Loading Infinite Loop
+name: StockForge Fix
 
 on:
   workflow_dispatch:
@@ -8,208 +8,73 @@ on:
         required: false
         default: Vishalsnw
         type: string
+      
+  push:
+    branches: 
+      - main
 
 jobs:
-  fix-loading-loop:
-    name: Fix Loading Loop
+  fix-issues:
+    name: Fix Issues
     runs-on: ubuntu-latest
     
     steps:
-      - name: Display Info
-        run: |
-          echo "Fixing Infinite Loading Loop"
-          echo "User: ${{ inputs.user_name || 'Vishalsnw' }}"
-          echo "UTC Time: 2025-06-12 14:43:51"
-
-      - name: Checkout Repository
+      - name: Checkout
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          fetch-depth: 0
 
-      - name: Setup Node.js
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 18
 
-      - name: Fix useBotMarket Hook Variables
+      - name: Fix Loading Issues
         run: |
+          echo "Fixing loading issues for Vishalsnw"
+          echo "Time: 2025-06-12 14:48:43 UTC"
+          
           HOOK_FILE="frontend/src/hooks/useBotMarket.js"
           
-          if [ ! -f "$HOOK_FILE" ]; then
-            echo "Hook file not found: $HOOK_FILE"
-            exit 1
-          fi
-          
-          echo "Fixing undefined variables in hook..."
-          
-          # Fix all undefined currentUser variables by replacing with CURRENT_USER
-          sed -i 's/currentUser}/CURRENT_USER}/g' "$HOOK_FILE"
-          sed -i 's/currentUser at/CURRENT_USER at/g' "$HOOK_FILE"
-          sed -i 's/currentUser}/CURRENT_USER}/g' "$HOOK_FILE"
-          sed -i 's/for ${currentUser}/for ${CURRENT_USER}/g' "$HOOK_FILE"
-          
-          # Fix undefined currentDateTimeUTC variables
-          sed -i 's/currentDateTimeUTC}/SESSION_START_TIME}/g' "$HOOK_FILE"
-          sed -i 's/at ${currentDateTimeUTC}/at ${SESSION_START_TIME}/g' "$HOOK_FILE"
-          
-          # Fix undefined currentDate variable  
-          sed -i 's/tradingDay: currentDate/tradingDay: SESSION_START_TIME.split(" ")[0]/g' "$HOOK_FILE"
-          
-          echo "Hook variables fixed"
-
-      - name: Update HTML Loading Screen
-        run: |
-          HTML_FILE="frontend/index.html"
-          
-          if [ ! -f "$HTML_FILE" ]; then
-            echo "HTML file not found: $HTML_FILE"
-            exit 1
-          fi
-          
-          echo "Updating HTML loading screen timestamp..."
-          
-          # Update timestamp to current time
-          sed -i 's/2025-06-11 21:40:11/2025-06-12 14:43:51/g' "$HTML_FILE"
-          
-          # Add loading timeout script
-          sed -i '/<script>/i\
-    <!-- Loading Timeout Script -->\
-    <script>\
-      setTimeout(() => {\
-        const loadingDiv = document.querySelector(".app-loading");\
-        if (loadingDiv && loadingDiv.style.display !== "none") {\
-          console.warn("Loading timeout reached - check console for errors");\
-          loadingDiv.innerHTML = `\
-            <div class="loading-container">\
-              <h2>🚨 Loading Error</h2>\
-              <p>Please check browser console for errors</p>\
-              <button onclick="location.reload()" style="padding: 10px 20px; margin-top: 20px;">Reload Page</button>\
-            </div>\
-          `;\
-        }\
-      }, 10000);\
-    </script>' "$HTML_FILE"
-          
-          echo "HTML loading screen updated"
-
-      - name: Reduce App Loading Timeout
-        run: |
-          APP_FILE="frontend/src/App.jsx"
-          
-          if [ ! -f "$APP_FILE" ]; then
-            echo "App file not found: $APP_FILE"
-            exit 1
-          fi
-          
-          echo "Reducing app loading timeout..."
-          
-          # Change timeout from 1000ms to 500ms for faster loading
-          sed -i 's/setTimeout(() => {/setTimeout(() => {\
-        console.log("App initialization starting for Vishalsnw...");/g' "$APP_FILE"
-          sed -i 's/}, 1000);/}, 500);/g' "$APP_FILE"
-          
-          # Add error handling
-          sed -i '/setIsAppReady(true);/a\
-      }).catch(error => {\
-        console.error("App initialization error:", error);\
-        setIsAppReady(true); // Force ready state even with errors' "$APP_FILE"
-          
-          echo "App loading timeout reduced"
-
-      - name: Add Console Error Logging
-        run: |
-          # Create error logging script
-          cat > frontend/public/error-handler.js << 'EOF'
-          // Error Handler for Vishalsnw - 2025-06-12 14:43:51
-          window.addEventListener('error', function(e) {
-            console.error('JavaScript Error:', {
-              message: e.message,
-              filename: e.filename,
-              lineno: e.lineno,
-              colno: e.colno,
-              error: e.error
-            });
+          if [ -f "$HOOK_FILE" ]; then
+            echo "Fixing hook variables..."
             
-            // Show user-friendly error
-            const loadingDiv = document.querySelector('.app-loading');
-            if (loadingDiv) {
-              loadingDiv.innerHTML = `
-                <div class="loading-container">
-                  <h2>🚨 Loading Error Detected</h2>
-                  <p>Error: ${e.message}</p>
-                  <p>File: ${e.filename}:${e.lineno}</p>
-                  <button onclick="location.reload()" style="padding: 10px 20px; margin-top: 20px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">Reload Page</button>
-                  <br><br>
-                  <small>Error logged for debugging</small>
-                </div>
-              `;
-            }
-          });
+            # Fix undefined variables
+            sed -i 's/currentUser}/CURRENT_USER}/g' "$HOOK_FILE"
+            sed -i 's/for ${currentUser}/for ${CURRENT_USER}/g' "$HOOK_FILE"
+            sed -i 's/currentDateTimeUTC}/SESSION_START_TIME}/g' "$HOOK_FILE"
+            sed -i 's/at ${currentDateTimeUTC}/at ${SESSION_START_TIME}/g' "$HOOK_FILE"
+            
+            echo "Hook fixed"
+          fi
           
-          window.addEventListener('unhandledrejection', function(e) {
-            console.error('Unhandled Promise Rejection:', e.reason);
-          });
-          
-          console.log('Error handler loaded for Vishalsnw at 2025-06-12 14:43:51');
-          EOF
-          
-          # Add error handler to HTML
-          sed -i '/<\/head>/i\
-    <script src="/error-handler.js"></script>' frontend/index.html
-          
-          echo "Error logging added"
+          HTML_FILE="frontend/index.html"
+          if [ -f "$HTML_FILE" ]; then
+            echo "Updating HTML timestamp..."
+            sed -i 's/2025-06-11 21:40:11/2025-06-12 14:48:43/g' "$HTML_FILE"
+            echo "HTML updated"
+          fi
 
-      - name: Test Build
+      - name: Build Test
         run: |
-          echo "Testing build after fixes..."
           cd frontend
           npm install
-          
-          # Test build with error handling
-          if npm run build; then
-            echo "BUILD SUCCESS: Loading issues should be resolved"
-          else
-            echo "BUILD FAILED: Check for remaining JavaScript errors"
-            npm run build 2>&1 | grep -i error || echo "No specific errors found"
-          fi
+          npm run build
 
-      - name: Commit Fixes
+      - name: Commit
         run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "StockForge-Bot"
+          git config user.email "action@github.com"
+          git config user.name "Bot"
           
           git add .
           
-          if git diff --staged --quiet; then
-            echo "No changes to commit"
-          else
-            git commit -m "Fix: Infinite loading loop - undefined variables and error handling - Vishalsnw - 2025-06-12 14:43:51"
+          if ! git diff --staged --quiet; then
+            git commit -m "Fix loading issues - Vishalsnw - 2025-06-12 14:48:43"
             git push
-            echo "Loading fixes committed and pushed"
           fi
 
-      - name: Deployment Instructions
+      - name: Summary
         run: |
-          echo "LOADING LOOP FIX COMPLETED"
-          echo "=========================="
-          echo "User: Vishalsnw"
-          echo "UTC Time: 2025-06-12 14:43:51"
-          echo ""
-          echo "Fixes Applied:"
-          echo "- Fixed undefined currentUser variables in hook"
-          echo "- Fixed undefined currentDateTimeUTC variables"
-          echo "- Updated HTML loading screen timestamp"
-          echo "- Reduced app loading timeout to 500ms"
-          echo "- Added loading timeout fallback (10 seconds)"
-          echo "- Added JavaScript error handler"
-          echo "- Added user-friendly error display"
-          echo ""
-          echo "Next Steps:"
-          echo "1. Wait for Vercel deployment (2-3 minutes)"
-          echo "2. Clear browser cache completely"
-          echo "3. Hard refresh (Ctrl+F5 / Cmd+Shift+R)"
-          echo "4. Check browser console for any remaining errors"
-          echo "5. If still stuck, click the 'Reload Page' button"
-          echo ""
-          echo "Loading should now complete in under 5 seconds!"
+          echo "Fix completed for Vishalsnw"
+          echo "Time: 2025-06-12 14:48:43 UTC"
+          echo "Loading should work now"
