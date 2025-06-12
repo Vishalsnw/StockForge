@@ -227,7 +227,7 @@ const BOT_COMPANIES = [
 ];
 
 // ===== COMPLETE DATABASE SUMMARY FOR VISHALSNW =====
-console.log(`🎯 Complete Bot Companies Database loaded for ${currentUser} at ${currentDateTimeUTC} UTC`);
+console.log(`🎯 Complete Bot Companies Database loaded for ${CURRENT_USER} at ${SESSION_START_TIME} UTC`);
 console.log(`📊 Total Companies: ${BOT_COMPANIES.length}`);
 console.log(`💻 Technology: 25 companies`);
 console.log(`🏥 Healthcare: 25 companies`);
@@ -375,7 +375,7 @@ export const useBotMarket = () => {
   // Log performance metrics for debugging
   const logPerformanceMetrics = useCallback((updateTime, quotesGenerated) => {
     if (updateCount % 10 === 0) { // Log every 10 updates
-      console.log(`📊 Performance Metrics for ${currentUser}:`);
+      console.log(`📊 Performance Metrics for ${CURRENT_USER}:`);
       console.log(`   • Update #${updateCount + 1} completed in ${updateTime.toFixed(2)}ms`);
       console.log(`   • Average update time: ${avgUpdateTime.toFixed(2)}ms`);
       console.log(`   • Quotes generated: ${quotesGenerated}`);
@@ -385,7 +385,7 @@ export const useBotMarket = () => {
   }, [updateCount, avgUpdateTime, currentUser, getCurrentTime]);
 
   // ===== SESSION INFO DISPLAY =====
-  console.log(`⚙️ Market Utility Functions initialized for ${currentUser} at ${currentDateTimeUTC} UTC`);
+  console.log(`⚙️ Market Utility Functions initialized for ${CURRENT_USER} at ${SESSION_START_TIME} UTC`);
   console.log(`🎯 Functions loaded: getCurrentTime, getMarketCondition, generateRandomPrice`);
   console.log(`📊 Advanced features: sector trends, volume generation, market sentiment`);
   console.log(`🚀 Ready for market data processing...`);
@@ -400,7 +400,7 @@ export const useBotMarket = () => {
   const updateMarketData = useCallback(() => {
     const startTime = performance.now();
     
-    console.log(`🔄 Starting market update #${updateCount + 1} for ${currentUser} at ${currentDateTimeUTC} UTC`);
+    console.log(`🔄 Starting market update #${updateCount + 1} for ${CURRENT_USER} at ${SESSION_START_TIME} UTC`);
     
     // Update global market trend with persistence
     const marketTrendChange = (Math.random() - 0.5) * 0.02;
@@ -563,7 +563,7 @@ export const useBotMarket = () => {
     // Log performance metrics
     logPerformanceMetrics(updateTime, newQuotes.size);
     
-    console.log(`✅ Market update #${updateCount + 1} completed for ${currentUser}`);
+    console.log(`✅ Market update #${updateCount + 1} completed for ${CURRENT_USER}`);
     console.log(`📊 ${newQuotes.size} quotes updated | ${updateTime.toFixed(2)}ms`);
     console.log(`📈 Market: ${sentiment.emoji} ${sentiment.description} (${avgChange.toFixed(2)}%)`);
     console.log(`🕒 Next update in ${MARKET_CONFIG.UPDATE_INTERVAL / 1000} seconds`);
@@ -576,7 +576,7 @@ export const useBotMarket = () => {
   ]);
 
   // ===== SESSION INFO FOR VISHALSNW =====
-  console.log(`🔄 Market Data Update Engine loaded for ${currentUser} at ${currentDateTimeUTC} UTC`);
+  console.log(`🔄 Market Data Update Engine loaded for ${CURRENT_USER} at ${SESSION_START_TIME} UTC`);
   console.log(`⚡ Update frequency: ${MARKET_CONFIG.UPDATE_INTERVAL / 1000} seconds`);
   console.log(`📊 Processing ${BOT_COMPANIES.length} companies across ${MARKET_CONFIG.SECTORS.length} sectors`);
   console.log(`🎯 Advanced features: sector analysis, market breadth, sentiment tracking`);
@@ -591,11 +591,11 @@ export const useBotMarket = () => {
   // Start the market engine for Vishalsnw
   const startEngine = useCallback(() => {
     if (updateIntervalRef.current) {
-      console.log(`⚠️ Market engine already running for ${currentUser}`);
+      console.log(`⚠️ Market engine already running for ${CURRENT_USER}`);
       return;
     }
     
-    console.log(`🚀 Starting StockForge Market Engine for ${currentUser} at ${getCurrentTime()}`);
+    console.log(`🚀 Starting StockForge Market Engine for ${CURRENT_USER} at ${getCurrentTime()}`);
     console.log(`📊 Initializing real-time updates for ${companies.length} companies`);
     console.log(`⚡ Update frequency: every ${MARKET_CONFIG.UPDATE_INTERVAL / 1000} seconds`);
     
@@ -604,7 +604,7 @@ export const useBotMarket = () => {
     setUpdateCount(0); // Reset counter for new session
     
     // Perform initial market data update
-    console.log(`🔄 Performing initial market update for ${currentUser}...`);
+    console.log(`🔄 Performing initial market update for ${CURRENT_USER}...`);
     updateMarketData();
     
     // Start continuous updates
@@ -612,19 +612,19 @@ export const useBotMarket = () => {
       updateMarketData();
     }, MARKET_CONFIG.UPDATE_INTERVAL);
     
-    console.log(`✅ StockForge Market Engine started successfully for ${currentUser}`);
-    console.log(`🎯 Session started at ${currentDateTimeUTC} UTC`);
+    console.log(`✅ StockForge Market Engine started successfully for ${CURRENT_USER}`);
+    console.log(`🎯 Session started at ${SESSION_START_TIME} UTC`);
     
   }, [updateMarketData, companies.length, currentUser, getCurrentTime]);
 
   // Stop the market engine for Vishalsnw
   const stopEngine = useCallback(() => {
     if (!updateIntervalRef.current) {
-      console.log(`⚠️ Market engine not running for ${currentUser}`);
+      console.log(`⚠️ Market engine not running for ${CURRENT_USER}`);
       return;
     }
     
-    console.log(`⏹️ Stopping StockForge Market Engine for ${currentUser} at ${getCurrentTime()}`);
+    console.log(`⏹️ Stopping StockForge Market Engine for ${CURRENT_USER} at ${getCurrentTime()}`);
     
     // Clear the update interval
     clearInterval(updateIntervalRef.current);
@@ -635,7 +635,7 @@ export const useBotMarket = () => {
     const sessionDuration = engineStartTime ? 
       Math.floor((Date.now() - engineStartTime.getTime()) / 1000) : 0;
     
-    console.log(`📊 Final session stats for ${currentUser}:`);
+    console.log(`📊 Final session stats for ${CURRENT_USER}:`);
     console.log(`   • Total updates: ${updateCount}`);
     console.log(`   • Session duration: ${Math.floor(sessionDuration / 60)}m ${sessionDuration % 60}s`);
     console.log(`   • Average update time: ${avgUpdateTime.toFixed(2)}ms`);
@@ -643,13 +643,13 @@ export const useBotMarket = () => {
     
     setEngineStartTime(null);
     
-    console.log(`✅ StockForge Market Engine stopped for ${currentUser}`);
+    console.log(`✅ StockForge Market Engine stopped for ${CURRENT_USER}`);
     
   }, [currentUser, getCurrentTime, engineStartTime, updateCount, avgUpdateTime, companies.length]);
 
   // Toggle engine state for Vishalsnw
   const toggleEngine = useCallback(() => {
-    console.log(`🔄 Toggling market engine state for ${currentUser}`);
+    console.log(`🔄 Toggling market engine state for ${CURRENT_USER}`);
     
     if (isEngineRunning) {
       console.log(`⏹️ Engine is running - stopping it...`);
@@ -662,7 +662,7 @@ export const useBotMarket = () => {
 
   // Restart engine with fresh data for Vishalsnw
   const restartEngine = useCallback(() => {
-    console.log(`🔄 Restarting StockForge Market Engine for ${currentUser}`);
+    console.log(`🔄 Restarting StockForge Market Engine for ${CURRENT_USER}`);
     
     if (isEngineRunning) {
       stopEngine();
@@ -678,11 +678,11 @@ export const useBotMarket = () => {
   // Pause engine temporarily (different from stop)
   const pauseEngine = useCallback(() => {
     if (!updateIntervalRef.current) {
-      console.log(`⚠️ Engine not running, cannot pause for ${currentUser}`);
+      console.log(`⚠️ Engine not running, cannot pause for ${CURRENT_USER}`);
       return;
     }
     
-    console.log(`⏸️ Pausing market updates for ${currentUser}`);
+    console.log(`⏸️ Pausing market updates for ${CURRENT_USER}`);
     clearInterval(updateIntervalRef.current);
     updateIntervalRef.current = null;
     // Keep isEngineRunning as true to indicate paused state
@@ -692,11 +692,11 @@ export const useBotMarket = () => {
   // Resume paused engine for Vishalsnw
   const resumeEngine = useCallback(() => {
     if (updateIntervalRef.current || !isEngineRunning) {
-      console.log(`⚠️ Engine not paused or already running for ${currentUser}`);
+      console.log(`⚠️ Engine not paused or already running for ${CURRENT_USER}`);
       return;
     }
     
-    console.log(`▶️ Resuming market updates for ${currentUser}`);
+    console.log(`▶️ Resuming market updates for ${CURRENT_USER}`);
     
     // Resume with immediate update
     updateMarketData();
@@ -706,7 +706,7 @@ export const useBotMarket = () => {
       updateMarketData();
     }, MARKET_CONFIG.UPDATE_INTERVAL);
     
-    console.log(`✅ Market engine resumed for ${currentUser}`);
+    console.log(`✅ Market engine resumed for ${CURRENT_USER}`);
     
   }, [isEngineRunning, updateMarketData, currentUser]);
 
@@ -738,14 +738,14 @@ export const useBotMarket = () => {
 
   // Force immediate market update (manual trigger)
   const forceUpdate = useCallback(() => {
-    console.log(`🔄 Force updating market data for ${currentUser}`);
+    console.log(`🔄 Force updating market data for ${CURRENT_USER}`);
     updateMarketData();
-    console.log(`✅ Manual market update completed for ${currentUser}`);
+    console.log(`✅ Manual market update completed for ${CURRENT_USER}`);
   }, [updateMarketData, currentUser]);
 
   // Reset market to initial state
   const resetMarket = useCallback(() => {
-    console.log(`🔄 Resetting market to initial state for ${currentUser}`);
+    console.log(`🔄 Resetting market to initial state for ${CURRENT_USER}`);
     
     // Stop engine if running
     if (isEngineRunning) {
@@ -763,7 +763,7 @@ export const useBotMarket = () => {
     marketTrendRef.current = 0;
     sectorTrendsRef.current.clear();
     
-    console.log(`✅ Market reset completed for ${currentUser}`);
+    console.log(`✅ Market reset completed for ${CURRENT_USER}`);
     console.log(`🎯 Ready for fresh market simulation`);
     
   }, [isEngineRunning, stopEngine, currentUser]);
@@ -786,10 +786,10 @@ export const useBotMarket = () => {
   }, [updateCount, avgUpdateTime, quotes.size, companies.length, getEngineStatus]);
 
   // ===== SESSION INFO FOR VISHALSNW =====
-  console.log(`🎮 Engine Control Functions loaded for ${currentUser} at ${currentDateTimeUTC} UTC`);
+  console.log(`🎮 Engine Control Functions loaded for ${CURRENT_USER} at ${SESSION_START_TIME} UTC`);
   console.log(`🚀 Available controls: start, stop, toggle, restart, pause, resume`);
   console.log(`📊 Advanced features: status monitoring, performance metrics, force update`);
-  console.log(`⚡ Ready for market engine control by ${currentUser}`);
+  console.log(`⚡ Ready for market engine control by ${CURRENT_USER}`);
 
   // Continue to Part 7...
   // ===== STOCKFORGE MARKET GAME ENGINE - PART 7/8 =====
@@ -801,7 +801,7 @@ export const useBotMarket = () => {
   // Get specific quote by ticker symbol for Vishalsnw
   const getQuote = useCallback((ticker) => {
     if (!ticker) {
-      console.log(`⚠️ No ticker provided for quote lookup by ${currentUser}`);
+      console.log(`⚠️ No ticker provided for quote lookup by ${CURRENT_USER}`);
       return null;
     }
     
@@ -809,7 +809,7 @@ export const useBotMarket = () => {
     if (quote) {
       console.log(`📊 Quote found for ${ticker} - Price: $${quote.price} (${quote.changePercent > 0 ? '+' : ''}${quote.changePercent}%)`);
     } else {
-      console.log(`⚠️ Quote not found for ticker: ${ticker} for ${currentUser}`);
+      console.log(`⚠️ Quote not found for ticker: ${ticker} for ${CURRENT_USER}`);
     }
     
     return quote || null;
@@ -818,7 +818,7 @@ export const useBotMarket = () => {
   // Get company information by ticker for Vishalsnw
   const getCompanyInfo = useCallback((ticker) => {
     if (!ticker) {
-      console.log(`⚠️ No ticker provided for company lookup by ${currentUser}`);
+      console.log(`⚠️ No ticker provided for company lookup by ${CURRENT_USER}`);
       return null;
     }
     
@@ -833,7 +833,7 @@ export const useBotMarket = () => {
   // Search companies by name, ticker, or sector for Vishalsnw
   const searchCompanies = useCallback((query) => {
     if (!query || query.length < 1) {
-      console.log(`⚠️ Empty search query provided by ${currentUser}`);
+      console.log(`⚠️ Empty search query provided by ${CURRENT_USER}`);
       return [];
     }
     
@@ -844,7 +844,7 @@ export const useBotMarket = () => {
       company.sector.toLowerCase().includes(searchTerm)
     )).slice(0, 20); // Limit to top 20 results
     
-    console.log(`🔍 Search for "${query}" by ${currentUser} returned ${results.length} results`);
+    console.log(`🔍 Search for "${query}" by ${CURRENT_USER} returned ${results.length} results`);
     
     return results;
   }, [companies, currentUser]);
@@ -854,7 +854,7 @@ export const useBotMarket = () => {
     const quotesArray = Array.from(quotes.values());
     
     if (quotesArray.length === 0) {
-      console.log(`⚠️ No quotes available for market movers for ${currentUser}`);
+      console.log(`⚠️ No quotes available for market movers for ${CURRENT_USER}`);
       return { gainers: [], losers: [], mostActive: [] };
     }
     
@@ -875,7 +875,7 @@ export const useBotMarket = () => {
       .sort((a, b) => b.volume - a.volume)
       .slice(0, 10);
     
-    console.log(`📈 Market movers for ${currentUser}: ${gainers.length} gainers, ${losers.length} losers, ${mostActive.length} most active`);
+    console.log(`📈 Market movers for ${CURRENT_USER}: ${gainers.length} gainers, ${losers.length} losers, ${mostActive.length} most active`);
     
     return { gainers, losers, mostActive };
   }, [quotes, currentUser]);
@@ -945,7 +945,7 @@ export const useBotMarket = () => {
       })
       .sort((a, b) => b.avgChange - a.avgChange);
     
-    console.log(`📊 Sector performance analysis completed for ${currentUser}`);
+    console.log(`📊 Sector performance analysis completed for ${CURRENT_USER}`);
     
     return result;
   }, [quotes, currentUser]);
@@ -953,7 +953,7 @@ export const useBotMarket = () => {
   // Get watchlist functionality for Vishalsnw
   const createWatchlist = useCallback((tickers) => {
     if (!Array.isArray(tickers) || tickers.length === 0) {
-      console.log(`⚠️ Invalid watchlist tickers provided by ${currentUser}`);
+      console.log(`⚠️ Invalid watchlist tickers provided by ${CURRENT_USER}`);
       return [];
     }
     
@@ -966,7 +966,7 @@ export const useBotMarket = () => {
         addedBy: currentUser
       }));
     
-    console.log(`👁️ Watchlist created for ${currentUser} with ${watchlist.length} stocks`);
+    console.log(`👁️ Watchlist created for ${CURRENT_USER} with ${watchlist.length} stocks`);
     
     return watchlist;
   }, [getQuote, getCurrentTime, currentUser]);
@@ -1011,7 +1011,7 @@ export const useBotMarket = () => {
       generatedFor: currentUser
     };
     
-    console.log(`📊 Market statistics generated for ${currentUser}`);
+    console.log(`📊 Market statistics generated for ${CURRENT_USER}`);
     
     return stats;
   }, [quotes, getCurrentTime, currentUser]);
@@ -1061,16 +1061,16 @@ export const useBotMarket = () => {
       filtered = filtered.slice(0, criteria.limit);
     }
     
-    console.log(`🔍 Filtered ${filtered.length} companies for ${currentUser} based on criteria`);
+    console.log(`🔍 Filtered ${filtered.length} companies for ${CURRENT_USER} based on criteria`);
     
     return filtered;
   }, [quotes, currentUser]);
 
   // ===== SESSION INFO FOR VISHALSNW =====
-  console.log(`🔍 Data Access Functions loaded for ${currentUser} at ${currentDateTimeUTC} UTC`);
+  console.log(`🔍 Data Access Functions loaded for ${CURRENT_USER} at ${SESSION_START_TIME} UTC`);
   console.log(`📊 Available functions: getQuote, searchCompanies, getMarketMovers, getSectorPerformance`);
   console.log(`👁️ Advanced features: watchlist, market stats, company filtering`);
-  console.log(`🎯 All data access optimized for ${currentUser}`);
+  console.log(`🎯 All data access optimized for ${CURRENT_USER}`);
 
   // Continue to Part 8...
   // ===== STOCKFORGE MARKET GAME ENGINE - PART 8/8 (FINAL) =====
@@ -1083,25 +1083,25 @@ export const useBotMarket = () => {
   // Cleanup function when component unmounts
   useEffect(() => {
     return () => {
-      console.log(`🧹 Cleaning up StockForge Market Engine for ${currentUser}`);
+      console.log(`🧹 Cleaning up StockForge Market Engine for ${CURRENT_USER}`);
       
       if (updateIntervalRef.current) {
         clearInterval(updateIntervalRef.current);
         updateIntervalRef.current = null;
-        console.log(`⏹️ Market engine stopped during cleanup for ${currentUser}`);
+        console.log(`⏹️ Market engine stopped during cleanup for ${CURRENT_USER}`);
       }
       
       // Clear all refs
       marketTrendRef.current = 0;
       sectorTrendsRef.current.clear();
       
-      console.log(`✅ Cleanup completed for ${currentUser} at ${getCurrentTime()}`);
+      console.log(`✅ Cleanup completed for ${CURRENT_USER} at ${getCurrentTime()}`);
     };
   }, [currentUser, getCurrentTime]);
 
   // ===== INITIAL SETUP =====
   useEffect(() => {
-    console.log(`🏦 Initializing StockForge Market for ${currentUser} at ${currentDateTimeUTC} UTC`);
+    console.log(`🏦 Initializing StockForge Market for ${CURRENT_USER} at ${SESSION_START_TIME} UTC`);
     
     // Initialize quotes with base prices
     const initialQuotes = new Map();
@@ -1138,10 +1138,10 @@ export const useBotMarket = () => {
     
     setQuotes(initialQuotes);
     
-    console.log(`📊 Initial market data loaded for ${currentUser}:`);
+    console.log(`📊 Initial market data loaded for ${CURRENT_USER}:`);
     console.log(`   • ${companies.length} companies initialized`);
     console.log(`   • ${MARKET_CONFIG.SECTORS.length} sectors active`);
-    console.log(`   • Base quotes generated at ${currentDateTimeUTC} UTC`);
+    console.log(`   • Base quotes generated at ${SESSION_START_TIME} UTC`);
     console.log(`   • Ready for market engine start`);
     
   }, [companies, currentUser, currentDateTimeUTC, getMarketCondition, getCurrentTime]);
@@ -1198,7 +1198,7 @@ export const useBotMarket = () => {
   };
 
   // ===== FINAL SESSION LOG FOR VISHALSNW =====
-  console.log(`🎯 StockForge Market Hook API ready for ${currentUser} at ${currentDateTimeUTC} UTC`);
+  console.log(`🎯 StockForge Market Hook API ready for ${CURRENT_USER} at ${SESSION_START_TIME} UTC`);
   console.log(`📦 Hook package contains:`);
   console.log(`   🎮 Engine Controls: start, stop, toggle, restart, pause, resume`);
   console.log(`   📊 Market Data: ${companies.length} companies, real-time quotes, market summary`);
@@ -1206,7 +1206,7 @@ export const useBotMarket = () => {
   console.log(`   ⚡ Performance: update tracking, metrics, status monitoring`);
   console.log(`   👤 Session: user tracking, timestamps, configuration`);
   console.log(`🚀 Total API Methods: ${Object.keys(hookAPI).length}`);
-  console.log(`✅ Ready for production use by ${currentUser}!`);
+  console.log(`✅ Ready for production use by ${CURRENT_USER}!`);
 
   return hookAPI;
 };
