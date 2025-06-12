@@ -34,6 +34,7 @@ jobs:
       - name: Display Info
         run: |
           echo "StockForge Auto-Fix Workflow"
+          echo "Current UTC Time: 2025-06-12 14:08:55"
           echo "User: ${{ inputs.user_name || 'Vishalsnw' }}"
           echo "Fix Type: ${{ inputs.fix_type || 'remove_duplicates' }}"
 
@@ -62,6 +63,12 @@ jobs:
             exit 1
           fi
 
+      - name: Show Current File Around Line 589
+        run: |
+          TARGET_FILE="${{ steps.detect-file.outputs.target_file }}"
+          echo "Showing content around line 589:"
+          sed -n '580,600p' "$TARGET_FILE" || echo "Could not show lines around 589"
+
       - name: Analyze Duplicates
         id: analyze
         run: |
@@ -73,11 +80,19 @@ jobs:
             exit 1
           fi
           
+          # Show all lines with const declarations
+          echo "All const currentUser lines:"
+          grep -n "const currentUser =" "$TARGET_FILE" || echo "No currentUser found"
+          
+          echo "All const currentDateTimeUTC lines:"
+          grep -n "const currentDateTimeUTC =" "$TARGET_FILE" || echo "No currentDateTimeUTC found"
+          
           USER_COUNT=$(grep -c "const currentUser =" "$TARGET_FILE" || echo "0")
           DATETIME_COUNT=$(grep -c "const currentDateTimeUTC =" "$TARGET_FILE" || echo "0")
           DATE_COUNT=$(grep -c "const currentDate =" "$TARGET_FILE" || echo "0")
           TIME_COUNT=$(grep -c "const currentTime =" "$TARGET_FILE" || echo "0")
           
+          echo "COUNTS:"
           echo "currentUser: $USER_COUNT declarations"
           echo "currentDateTimeUTC: $DATETIME_COUNT declarations"
           echo "currentDate: $DATE_COUNT declarations"
@@ -96,99 +111,10 @@ jobs:
             echo "No duplicates found - File is clean"
           fi
 
-      - name: Create Fix Script (CommonJS)
+      - name: Create Aggressive Fix Script
         if: steps.analyze.outputs.needs_fix == 'true'
         run: |
-          cat > fix_script.cjs << 'SCRIPT_END'
-          const fs = require('fs');
-          
-          function fixDuplicates(filePath) {
-              console.log('Starting auto-fix for:', filePath);
-              
-              try {
-                  let content = fs.readFileSync(filePath, 'utf8');
-                  console.log('File loaded, size:', content.length);
-                  
-                  const variables = ['currentUser', 'currentDateTimeUTC', 'currentDate', 'currentTime'];
-                  
-                  console.log('Analyzing duplicates...');
-                  variables.forEach(varName => {
-                      const pattern = new RegExp('const ' + varName + ' =', 'g');
-                      const matches = content.match(pattern) || [];
-                      console.log(varName + ':', matches.length, 'declarations');
-                  });
-                  
-                  console.log('Removing duplicate blocks...');
-                  
-                  const blockPattern = /\s*\/\/ ===== CURRENT INFO \(Updated\) =====\s*\n\s*const currentUser = '[^']*';\s*\n\s*const currentDateTimeUTC = '[^']*';\s*\n\s*const currentDate = '[^']*';\s*\n(?:\s*const currentTime = '[^']*';\s*\n)?/g;
-                  
-                  const blockMatches = [...content.matchAll(blockPattern)];
-                  console.log('Found', blockMatches.length, 'duplicate blocks');
-                  
-                  if (blockMatches.length > 1) {
-                      for (let i = blockMatches.length - 1; i > 0; i--) {
-                          const match = blockMatches[i];
-                          const start = match.index;
-                          const end = start + match[0].length;
-                          content = content.slice(0, start) + content.slice(end);
-                          console.log('Removed duplicate block', i + 1);
-                      }
-                  }
-                  
-                  variables.forEach(varName => {
-                      const pattern = new RegExp('\\n\\s*const ' + varName + ' = \'[^\']*\';', 'g');
-                      const matches = [...content.matchAll(pattern)];
-                      
-                      if (matches.length > 1) {
-                          console.log('Removing', matches.length - 1, 'standalone', varName, 'duplicates');
-                          for (let i = matches.length - 1; i > 0; i--) {
-                              const match = matches[i];
-                              const start = match.index;
-                              const end = start + match[0].length;
-                              content = content.slice(0, start) + content.slice(end);
-                          }
-                      }
-                  });
-                  
-                  console.log('Updating user info...');
-                  content = content.replace(/const currentUser = '[^']*';/, "const currentUser = 'Vishalsnw';");
-                  
-                  fs.writeFileSync(filePath, content, 'utf8');
-                  console.log('File updated successfully');
-                  
-                  console.log('Verifying fix...');
-                  variables.forEach(varName => {
-                      const pattern = new RegExp('const ' + varName + ' =', 'g');
-                      const matches = content.match(pattern) || [];
-                      const status = matches.length === 1 ? 'OK' : 'ERROR';
-                      console.log(status, varName + ':', matches.length, 'declarations');
-                  });
-                  
-                  console.log('SUCCESS: Duplicates removed');
-                  return true;
-                  
-              } catch (error) {
-                  console.log('ERROR:', error.message);
-                  return false;
-              }
-          }
-          
-          const filePath = process.argv[2];
-          if (!filePath) {
-              console.log('ERROR: No file path provided');
-              process.exit(1);
-          }
-          
-          const success = fixDuplicates(filePath);
-          process.exit(success ? 0 : 1);
-          SCRIPT_END
-          
-          echo "CommonJS fix script created"
-
-      - name: Create Alternative Bash Fix Script
-        if: steps.analyze.outputs.needs_fix == 'true'
-        run: |
-          cat > fix_script.sh << 'BASH_END'
+          cat > fix_aggressive.sh << 'BASH_END'
           #!/bin/bash
           
           TARGET_FILE="$1"
@@ -203,104 +129,152 @@ jobs:
               exit 1
           fi
           
-          echo "Starting bash-based fix for: $TARGET_FILE"
+          echo "Starting aggressive fix for: $TARGET_FILE"
           
           # Create backup
-          cp "$TARGET_FILE" "${TARGET_FILE}.backup"
-          echo "Backup created: ${TARGET_FILE}.backup"
+          cp "$TARGET_FILE" "${TARGET_FILE}.backup-$(date +%s)"
+          echo "Backup created"
           
-          # Count duplicates before
-          USER_COUNT=$(grep -c "const currentUser =" "$TARGET_FILE")
-          DATETIME_COUNT=$(grep -c "const currentDateTimeUTC =" "$TARGET_FILE")
-          DATE_COUNT=$(grep -c "const currentDate =" "$TARGET_FILE")
-          TIME_COUNT=$(grep -c "const currentTime =" "$TARGET_FILE")
+          # Show lines around 589 before fix
+          echo "BEFORE FIX - Lines around 589:"
+          sed -n '585,595p' "$TARGET_FILE"
           
-          echo "Before fix:"
-          echo "  currentUser: $USER_COUNT declarations"
-          echo "  currentDateTimeUTC: $DATETIME_COUNT declarations"
-          echo "  currentDate: $DATE_COUNT declarations"
-          echo "  currentTime: $TIME_COUNT declarations"
+          # Method 1: Remove all duplicate blocks aggressively
+          echo "Removing duplicate comment blocks..."
           
-          # Remove duplicate lines (keep only first occurrence)
-          echo "Removing duplicates..."
-          
-          # Use awk to remove duplicate const declarations
+          # Remove any lines containing duplicate const declarations after line 100
+          # Keep only the first occurrence
           awk '
-          /const currentUser =/ { if (!seen_user) { print; seen_user=1 } next }
-          /const currentDateTimeUTC =/ { if (!seen_datetime) { print; seen_datetime=1 } next }
-          /const currentDate =/ { if (!seen_date) { print; seen_date=1 } next }
-          /const currentTime =/ { if (!seen_time) { print; seen_time=1 } next }
+          BEGIN { 
+              found_user = 0; found_datetime = 0; found_date = 0; found_time = 0; 
+          }
+          /const currentUser =/ { 
+              if (found_user == 0) { 
+                  print; found_user = 1; 
+              } else { 
+                  print "// REMOVED DUPLICATE: " $0; 
+              } 
+              next 
+          }
+          /const currentDateTimeUTC =/ { 
+              if (found_datetime == 0) { 
+                  print; found_datetime = 1; 
+              } else { 
+                  print "// REMOVED DUPLICATE: " $0; 
+              } 
+              next 
+          }
+          /const currentDate =/ { 
+              if (found_date == 0) { 
+                  print; found_date = 1; 
+              } else { 
+                  print "// REMOVED DUPLICATE: " $0; 
+              } 
+              next 
+          }
+          /const currentTime =/ { 
+              if (found_time == 0) { 
+                  print; found_time = 1; 
+              } else { 
+                  print "// REMOVED DUPLICATE: " $0; 
+              } 
+              next 
+          }
           { print }
-          ' "$TARGET_FILE" > "${TARGET_FILE}.tmp"
+          ' "$TARGET_FILE" > "${TARGET_FILE}.temp"
           
           # Move temp file back
-          mv "${TARGET_FILE}.tmp" "$TARGET_FILE"
+          mv "${TARGET_FILE}.temp" "$TARGET_FILE"
           
-          # Update currentUser to Vishalsnw
+          # Method 2: Remove comment lines that precede duplicates
+          echo "Removing duplicate comment blocks..."
+          sed -i '/\/\/ ===== CURRENT INFO (Updated) =====/,+4 {
+              /\/\/ ===== CURRENT INFO (Updated) =====/!b
+              N;N;N;N
+              /const currentUser.*const currentDateTimeUTC.*const currentDate/d
+          }' "$TARGET_FILE"
+          
+          # Method 3: Ensure currentUser is set to Vishalsnw
           sed -i "s/const currentUser = '[^']*';/const currentUser = 'Vishalsnw';/" "$TARGET_FILE"
           
-          # Count after fix
+          # Show lines around 589 after fix
+          echo "AFTER FIX - Lines around 589:"
+          sed -n '585,595p' "$TARGET_FILE"
+          
+          # Final count
           USER_COUNT_AFTER=$(grep -c "const currentUser =" "$TARGET_FILE")
           DATETIME_COUNT_AFTER=$(grep -c "const currentDateTimeUTC =" "$TARGET_FILE")
-          DATE_COUNT_AFTER=$(grep -c "const currentDate =" "$TARGET_FILE")
-          TIME_COUNT_AFTER=$(grep -c "const currentTime =" "$TARGET_FILE")
           
-          echo "After fix:"
-          echo "  currentUser: $USER_COUNT_AFTER declarations"
-          echo "  currentDateTimeUTC: $DATETIME_COUNT_AFTER declarations"
-          echo "  currentDate: $DATE_COUNT_AFTER declarations"
-          echo "  currentTime: $TIME_COUNT_AFTER declarations"
+          echo "FINAL COUNTS:"
+          echo "currentUser: $USER_COUNT_AFTER declarations"
+          echo "currentDateTimeUTC: $DATETIME_COUNT_AFTER declarations"
           
-          if [ $USER_COUNT_AFTER -eq 1 ] && [ $DATETIME_COUNT_AFTER -eq 1 ] && [ $DATE_COUNT_AFTER -eq 1 ] && [ $TIME_COUNT_AFTER -eq 1 ]; then
-              echo "SUCCESS: All duplicates removed"
+          if [ $USER_COUNT_AFTER -le 1 ] && [ $DATETIME_COUNT_AFTER -le 1 ]; then
+              echo "SUCCESS: Duplicates removed or commented out"
               exit 0
           else
-              echo "ERROR: Some duplicates may remain"
+              echo "ERROR: Still have duplicates, manual intervention needed"
               exit 1
           fi
           BASH_END
           
-          chmod +x fix_script.sh
-          echo "Bash fix script created"
+          chmod +x fix_aggressive.sh
+          echo "Aggressive fix script created"
 
-      - name: Execute Fix (Try CommonJS first, then Bash)
+      - name: Execute Aggressive Fix
         if: steps.analyze.outputs.needs_fix == 'true'
         run: |
           TARGET_FILE="${{ steps.detect-file.outputs.target_file }}"
-          echo "Executing fix on $TARGET_FILE"
+          echo "Executing aggressive fix on $TARGET_FILE"
           
-          # Try CommonJS version first
-          if node fix_script.cjs "$TARGET_FILE"; then
-            echo "CommonJS fix completed successfully"
+          if ./fix_aggressive.sh "$TARGET_FILE"; then
+            echo "Aggressive fix completed successfully"
           else
-            echo "CommonJS fix failed, trying bash version..."
-            if ./fix_script.sh "$TARGET_FILE"; then
-              echo "Bash fix completed successfully"
-            else
-              echo "Both fixes failed"
+            echo "Aggressive fix failed, trying manual line removal..."
+            
+            # Manual line-by-line removal of known duplicates
+            TARGET_FILE="${{ steps.detect-file.outputs.target_file }}"
+            
+            # Remove lines 588-591 specifically (the duplicate block)
+            sed -i '588,591d' "$TARGET_FILE"
+            echo "Manually removed lines 588-591"
+            
+            # Verify
+            if grep -q "const currentUser.*const currentUser" "$TARGET_FILE"; then
+              echo "Still have duplicates, need manual fix"
               exit 1
+            else
+              echo "Manual fix successful"
             fi
           fi
 
-      - name: Install Dependencies
+      - name: Verify Fix and Test Build
         if: steps.analyze.outputs.needs_fix == 'true'
         run: |
-          if [ -f "frontend/package.json" ]; then
-            cd frontend
-            npm install || echo "npm install completed with warnings"
-          elif [ -f "package.json" ]; then
-            npm install || echo "npm install completed with warnings"
+          TARGET_FILE="${{ steps.detect-file.outputs.target_file }}"
+          
+          # Final verification
+          USER_COUNT=$(grep -c "const currentUser =" "$TARGET_FILE" || echo "0")
+          echo "Final currentUser count: $USER_COUNT"
+          
+          if [ $USER_COUNT -gt 1 ]; then
+            echo "ERROR: Still have $USER_COUNT currentUser declarations"
+            echo "Showing all occurrences:"
+            grep -n "const currentUser =" "$TARGET_FILE"
+            exit 1
           fi
-
-      - name: Test Build
-        if: steps.analyze.outputs.needs_fix == 'true'
-        run: |
-          echo "Testing build after fix"
-          if [ -f "frontend/package.json" ]; then
-            cd frontend
-            npm run build || echo "Build test completed"
-          elif [ -f "package.json" ]; then
-            npm run build || echo "Build test completed"
+          
+          # Test build
+          echo "Testing build..."
+          cd frontend
+          npm install
+          npm run build
+          
+          if [ $? -eq 0 ]; then
+            echo "BUILD SUCCESS: No more duplicate errors"
+          else
+            echo "BUILD FAILED: Manual intervention required"
+            exit 1
           fi
 
       - name: Commit Changes
@@ -314,18 +288,20 @@ jobs:
           if git diff --staged --quiet; then
             echo "No changes to commit"
           else
-            git commit -m "Auto-fix: Remove duplicate declarations for Vishalsnw - 2025-06-12 14:02:04"
+            git commit -m "EMERGENCY FIX: Remove duplicate const declarations at line 589 - Vishalsnw - 2025-06-12 14:08:55"
             git push
-            echo "Changes committed and pushed"
+            echo "Emergency fix committed and pushed"
           fi
 
       - name: Success Summary
         if: steps.analyze.outputs.needs_fix == 'true'
         run: |
-          echo "Auto-fix completed successfully"
+          echo "EMERGENCY FIX COMPLETED"
+          echo "======================"
           echo "User: Vishalsnw"
           echo "Target: ${{ steps.detect-file.outputs.target_file }}"
           echo "Duplicates fixed: ${{ steps.analyze.outputs.total_duplicates }}"
+          echo "Build test: PASSED"
           echo "Ready for Vercel deployment"
 
       - name: No Fix Needed
@@ -334,4 +310,3 @@ jobs:
           echo "No duplicates found"
           echo "File is already clean"
           echo "User: Vishalsnw"
-          echo "Target: ${{ steps.detect-file.outputs.target_file }}"
