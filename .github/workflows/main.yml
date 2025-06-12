@@ -1,4 +1,4 @@
-name: Fix Loading Screen Issue
+name: StockForge Auto-Fix
 
 on:
   workflow_dispatch:
@@ -8,153 +8,79 @@ on:
         required: false
         default: Vishalsnw
         type: string
+      
+  push:
+    branches: 
+      - main
+    paths: 
+      - frontend/src/hooks/useBotMarket.js
+      - src/hooks/useBotMarket.js
 
 jobs:
-  fix-loading:
-    name: Fix Loading Screen
+  fix-duplicates:
+    name: Fix Issues
     runs-on: ubuntu-latest
     
     steps:
       - name: Display Info
         run: |
-          echo "Fixing Loading Screen Issue"
+          echo "StockForge Auto-Fix"
           echo "User: ${{ inputs.user_name || 'Vishalsnw' }}"
-          echo "Current UTC: 2025-06-12 14:31:32"
+          echo "UTC Time: 2025-06-12 14:36:05"
 
-      - name: Checkout Repository
+      - name: Checkout
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          fetch-depth: 0
 
-      - name: Setup Node.js
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 18
 
-      - name: Find and Fix Loading Issues
+      - name: Fix Duplicates
         run: |
-          echo "Searching for loading screen and initialization code..."
-          
-          # Find files that might contain loading logic
-          find . -name "*.js" -o -name "*.jsx" -o -name "*.ts" -o -name "*.tsx" | xargs grep -l "Loading Market Game" || echo "No loading text found"
-          find . -name "*.js" -o -name "*.jsx" -o -name "*.ts" -o -name "*.tsx" | xargs grep -l "Initializing at" || echo "No initializing text found"
-          
-          # Look for useBotMarket hook usage
-          find . -name "*.js" -o -name "*.jsx" | xargs grep -l "useBotMarket" || echo "No useBotMarket usage found"
-          
-          # Check for async loading issues
-          echo "Checking for potential async issues..."
-          find . -name "*.js" -o -name "*.jsx" | xargs grep -n "useState.*loading" || echo "No loading state found"
-          find . -name "*.js" -o -name "*.jsx" | xargs grep -n "useEffect" || echo "No useEffect found"
-
-      - name: Fix Loading Screen Timeout
-        run: |
-          # Find the main component file
-          if [ -f "frontend/src/components/StockForge.jsx" ]; then
-            MAIN_FILE="frontend/src/components/StockForge.jsx"
-          elif [ -f "frontend/src/components/StockForge.js" ]; then
-            MAIN_FILE="frontend/src/components/StockForge.js"
-          elif [ -f "src/components/StockForge.jsx" ]; then
-            MAIN_FILE="src/components/StockForge.jsx"
-          elif [ -f "src/components/StockForge.js" ]; then
-            MAIN_FILE="src/components/StockForge.js"
-          else
-            echo "Main component file not found, searching..."
-            MAIN_FILE=$(find . -name "*.jsx" -o -name "*.js" | xargs grep -l "Loading Market Game" | head -1)
-          fi
-          
-          if [ -n "$MAIN_FILE" ] && [ -f "$MAIN_FILE" ]; then
-            echo "Found main file: $MAIN_FILE"
-            echo "Checking current content..."
-            
-            # Show loading-related code
-            grep -n -A5 -B5 "Loading Market Game" "$MAIN_FILE" || echo "Loading text not found"
-            
-            # Add loading timeout fix
-            echo "Adding loading timeout fix..."
-            
-            # Backup
-            cp "$MAIN_FILE" "${MAIN_FILE}.backup"
-            
-            # Add timeout to loading screen (force load after 3 seconds)
-            sed -i 's/Loading Market Game for/Loading Market Game for/' "$MAIN_FILE"
-            
-            echo "Loading screen timeout added"
-          else
-            echo "Could not find main component file"
-          fi
-
-      - name: Fix useBotMarket Hook Issues
-        run: |
-          # Find and fix the hook file
           if [ -f "frontend/src/hooks/useBotMarket.js" ]; then
-            HOOK_FILE="frontend/src/hooks/useBotMarket.js"
+            FILE="frontend/src/hooks/useBotMarket.js"
           elif [ -f "src/hooks/useBotMarket.js" ]; then
-            HOOK_FILE="src/hooks/useBotMarket.js"
+            FILE="src/hooks/useBotMarket.js"
           else
-            echo "Hook file not found"
+            echo "Target file not found"
             exit 0
           fi
           
-          echo "Fixing hook file: $HOOK_FILE"
+          echo "Processing: $FILE"
           
-          # Check if hook is returning properly
-          echo "Current hook structure:"
-          grep -n "return" "$HOOK_FILE" | tail -5
+          # Count duplicates
+          USER_COUNT=$(grep -c "const currentUser =" "$FILE" || echo "0")
+          echo "Found $USER_COUNT currentUser declarations"
           
-          # Ensure hook returns loading state
-          if ! grep -q "loading.*false" "$HOOK_FILE"; then
-            echo "Adding proper loading state management..."
+          if [ $USER_COUNT -gt 1 ]; then
+            echo "Removing duplicates..."
             
-            # Add loading state fix at the end of the hook
-            sed -i '/return {/,/};/ {
-              /loading:/!{
-                /};/i\
-    loading: false,
-              }
-            }' "$HOOK_FILE"
+            # Remove our duplicate patterns only
+            sed -i '/const currentUser.*Vishalsnw/d' "$FILE"
+            sed -i '/const currentDateTimeUTC.*2025-/d' "$FILE"
+            sed -i '/const currentDate.*2025-/d' "$FILE"
+            sed -i '/const currentTime.*[0-9][0-9]:[0-9][0-9]/d' "$FILE"
+            sed -i '/\/\/ ===== CURRENT INFO/d' "$FILE"
+            sed -i '/\/\/ REMOVED DUPLICATE/d' "$FILE"
+            
+            # Verify fix
+            NEW_COUNT=$(grep -c "const currentUser =" "$FILE" || echo "0")
+            echo "After fix: $NEW_COUNT currentUser declarations"
+            
+            if [ $NEW_COUNT -eq 1 ]; then
+              echo "SUCCESS: Duplicates removed"
+            else
+              echo "WARNING: Unexpected count"
+            fi
+          else
+            echo "No duplicates found"
           fi
-          
-          echo "Hook loading state fixed"
-
-      - name: Add Loading Timeout Component
-        run: |
-          # Create a simple loading timeout fix
-          cat > loading_timeout_fix.js << 'EOF'
-          // Loading Timeout Fix for Vishalsnw
-          // Add this to your main component
-          
-          // In your component, add this useEffect:
-          useEffect(() => {
-            const loadingTimeout = setTimeout(() => {
-              console.log('Loading timeout reached, forcing initialization...');
-              // Force the loading state to false after 5 seconds
-              setLoading(false);
-            }, 5000);
-            
-            return () => clearTimeout(loadingTimeout);
-          }, []);
-          
-          // Also add this loading state check:
-          if (loading) {
-            return (
-              <div className="loading-container">
-                <h2>Loading Market Game for Vishalsnw...</h2>
-                <p>🚀 Initializing at {new Date().toISOString().slice(0, 19)} UTC</p>
-                <p>If this takes too long, please refresh the page.</p>
-              </div>
-            );
-          }
-          EOF
-          
-          echo "Loading timeout fix created"
-          cat loading_timeout_fix.js
 
       - name: Test Build
         run: |
-          echo "Testing build after fixes..."
-          
           if [ -f "frontend/package.json" ]; then
             cd frontend
             npm install
@@ -164,39 +90,23 @@ jobs:
             npm run build
           fi
 
-      - name: Commit Fixes
+      - name: Commit
         run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "StockForge-Bot"
-          
-          # Remove the temp loading fix file
-          rm -f loading_timeout_fix.js
+          git config user.email "action@github.com"
+          git config user.name "StockForge-Bot"
           
           git add .
           
-          if git diff --staged --quiet; then
-            echo "No changes to commit"
-          else
-            git commit -m "Fix: Loading screen timeout issue - Vishalsnw - 2025-06-12 14:31:32"
+          if ! git diff --staged --quiet; then
+            git commit -m "Fix duplicates - Vishalsnw - 2025-06-12 14:36:05"
             git push
-            echo "Loading fixes committed"
+            echo "Changes pushed"
+          else
+            echo "No changes"
           fi
 
-      - name: Deployment Check
+      - name: Summary
         run: |
-          echo "LOADING SCREEN FIX COMPLETED"
-          echo "============================"
+          echo "Fix completed"
           echo "User: Vishalsnw"
-          echo "Current UTC: 2025-06-12 14:31:32"
-          echo ""
-          echo "Fixes Applied:"
-          echo "- Added loading timeout protection"
-          echo "- Fixed hook loading state"
-          echo "- Updated timestamps"
-          echo "- Added fallback loading screen"
-          echo ""
-          echo "Next Steps:"
-          echo "1. Wait for Vercel deployment"
-          echo "2. Clear browser cache"
-          echo "3. Hard refresh the page"
-          echo "4. Check browser console for errors"
+          echo "Time: 2025-06-12 14:36:05"
