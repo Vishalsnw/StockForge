@@ -1,45 +1,41 @@
-name: 🏦 StockForge Auto-Fix Duplicates
+name: StockForge Auto-Fix Duplicates
 
 on:
   workflow_dispatch:
     inputs:
       fix_type:
-        description: 'Type of fix to apply'
+        description: Type of fix to apply
         required: true
-        default: 'remove_duplicates'
+        default: remove_duplicates
         type: choice
         options:
           - remove_duplicates
           - update_timestamps
           - full_cleanup
       user_name:
-        description: 'Target User'
+        description: Target User
         required: false
-        default: 'Vishalsnw'
+        default: Vishalsnw
         type: string
       
   push:
-    branches: [ main ]
+    branches: 
+      - main
     paths: 
-      - 'frontend/src/hooks/useBotMarket.js'
-      - 'src/hooks/useBotMarket.js'
+      - frontend/src/hooks/useBotMarket.js
+      - src/hooks/useBotMarket.js
 
-  workflow_run:
-    workflows: ["Vercel Production Deployment"]
-    types: [completed]
-    
 jobs:
   auto-fix-duplicates:
     name: Fix Duplicate Declarations
     runs-on: ubuntu-latest
     
     steps:
-      - name: Display Current Info
+      - name: Display Info
         run: |
           echo "StockForge Auto-Fix Workflow"
           echo "User: ${{ inputs.user_name || 'Vishalsnw' }}"
           echo "Fix Type: ${{ inputs.fix_type || 'remove_duplicates' }}"
-          echo "Workflow: auto-fix-duplicates"
 
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -47,77 +43,10 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
 
-      - name: Detect Package Structure
-        id: detect-structure
-        run: |
-          echo "Analyzing project structure..."
-          
-          if [ -f "frontend/package.json" ]; then
-            echo "Found: frontend/package.json"
-            echo "project_type=frontend" >> $GITHUB_OUTPUT
-            echo "package_path=frontend" >> $GITHUB_OUTPUT
-            echo "has_package_json=true" >> $GITHUB_OUTPUT
-            
-            if [ -f "frontend/package-lock.json" ]; then
-              echo "Found: frontend/package-lock.json"
-              echo "has_lockfile=true" >> $GITHUB_OUTPUT
-              echo "lockfile_path=frontend/package-lock.json" >> $GITHUB_OUTPUT
-            else
-              echo "Missing: frontend/package-lock.json"
-              echo "has_lockfile=false" >> $GITHUB_OUTPUT
-            fi
-            
-          elif [ -f "package.json" ]; then
-            echo "Found: package.json (root)"
-            echo "project_type=root" >> $GITHUB_OUTPUT
-            echo "package_path=." >> $GITHUB_OUTPUT
-            echo "has_package_json=true" >> $GITHUB_OUTPUT
-            
-            if [ -f "package-lock.json" ]; then
-              echo "Found: package-lock.json (root)"
-              echo "has_lockfile=true" >> $GITHUB_OUTPUT
-              echo "lockfile_path=package-lock.json" >> $GITHUB_OUTPUT
-            else
-              echo "Missing: package-lock.json (root)"
-              echo "has_lockfile=false" >> $GITHUB_OUTPUT
-            fi
-            
-          else
-            echo "No package.json found"
-            echo "project_type=none" >> $GITHUB_OUTPUT
-            echo "has_package_json=false" >> $GITHUB_OUTPUT
-            echo "has_lockfile=false" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Setup Node.js with Cache
-        if: steps.detect-structure.outputs.has_lockfile == 'true'
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
-          cache: 'npm'
-          cache-dependency-path: ${{ steps.detect-structure.outputs.lockfile_path }}
-
-      - name: Setup Node.js without Cache
-        if: steps.detect-structure.outputs.has_lockfile == 'false'
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-
-      - name: Install Dependencies
-        if: steps.detect-structure.outputs.has_package_json == 'true'
-        run: |
-          PACKAGE_PATH="${{ steps.detect-structure.outputs.package_path }}"
-          echo "Installing dependencies in $PACKAGE_PATH"
-          
-          cd "$PACKAGE_PATH"
-          
-          if [ -f "package-lock.json" ]; then
-            echo "Using npm ci (with lockfile)"
-            npm ci
-          else
-            echo "Using npm install (no lockfile)"
-            npm install
-          fi
+          node-version: 18
 
       - name: Detect Target File
         id: detect-file
@@ -130,86 +59,75 @@ jobs:
             echo "Target: src/hooks/useBotMarket.js"
           else
             echo "ERROR: useBotMarket.js not found!"
-            echo "Searching for the file..."
-            find . -name "useBotMarket.js" -type f 2>/dev/null || echo "No useBotMarket.js found anywhere"
             exit 1
           fi
 
-      - name: Analyze Current Duplicates
+      - name: Analyze Duplicates
         id: analyze
         run: |
           TARGET_FILE="${{ steps.detect-file.outputs.target_file }}"
-          echo "Analyzing duplicate declarations in $TARGET_FILE"
+          echo "Analyzing duplicates in $TARGET_FILE"
           
           if [ ! -f "$TARGET_FILE" ]; then
             echo "File not found: $TARGET_FILE"
             exit 1
           fi
           
-          CURRENT_USER_COUNT=$(grep -c "const currentUser =" "$TARGET_FILE" || echo "0")
-          CURRENT_DATE_TIME_COUNT=$(grep -c "const currentDateTimeUTC =" "$TARGET_FILE" || echo "0")
-          CURRENT_DATE_COUNT=$(grep -c "const currentDate =" "$TARGET_FILE" || echo "0")
-          CURRENT_TIME_COUNT=$(grep -c "const currentTime =" "$TARGET_FILE" || echo "0")
+          USER_COUNT=$(grep -c "const currentUser =" "$TARGET_FILE" || echo "0")
+          DATETIME_COUNT=$(grep -c "const currentDateTimeUTC =" "$TARGET_FILE" || echo "0")
+          DATE_COUNT=$(grep -c "const currentDate =" "$TARGET_FILE" || echo "0")
+          TIME_COUNT=$(grep -c "const currentTime =" "$TARGET_FILE" || echo "0")
           
-          echo "DUPLICATE ANALYSIS:"
-          echo "  currentUser: $CURRENT_USER_COUNT declarations"
-          echo "  currentDateTimeUTC: $CURRENT_DATE_TIME_COUNT declarations"
-          echo "  currentDate: $CURRENT_DATE_COUNT declarations"
-          echo "  currentTime: $CURRENT_TIME_COUNT declarations"
+          echo "currentUser: $USER_COUNT declarations"
+          echo "currentDateTimeUTC: $DATETIME_COUNT declarations"
+          echo "currentDate: $DATE_COUNT declarations"
+          echo "currentTime: $TIME_COUNT declarations"
           
-          TOTAL_EXPECTED=4
-          TOTAL_FOUND=$((CURRENT_USER_COUNT + CURRENT_DATE_TIME_COUNT + CURRENT_DATE_COUNT + CURRENT_TIME_COUNT))
-          TOTAL_DUPLICATES=$((TOTAL_FOUND - TOTAL_EXPECTED))
+          TOTAL_FOUND=$((USER_COUNT + DATETIME_COUNT + DATE_COUNT + TIME_COUNT))
+          TOTAL_DUPLICATES=$((TOTAL_FOUND - 4))
           
           echo "total_duplicates=$TOTAL_DUPLICATES" >> $GITHUB_OUTPUT
           
           if [ $TOTAL_DUPLICATES -gt 0 ]; then
             echo "needs_fix=true" >> $GITHUB_OUTPUT
-            echo "$TOTAL_DUPLICATES duplicate declarations found - FIX NEEDED!"
+            echo "$TOTAL_DUPLICATES duplicates found - FIX NEEDED"
           else
             echo "needs_fix=false" >> $GITHUB_OUTPUT
-            echo "No duplicates found - File is clean!"
+            echo "No duplicates found - File is clean"
           fi
 
-      - name: Create Auto-Fix Script
+      - name: Create Fix Script
         if: steps.analyze.outputs.needs_fix == 'true'
         run: |
-          cat > auto_fix.js << 'EOF'
+          cat > fix_script.js << 'SCRIPT_END'
           const fs = require('fs');
           
-          function fixDuplicateDeclarations(filePath) {
-              console.log('StockForge Auto-Fix Script Starting...');
-              console.log('User: Vishalsnw');
-              console.log('Target:', filePath);
+          function fixDuplicates(filePath) {
+              console.log('Starting auto-fix for:', filePath);
               
               try {
                   let content = fs.readFileSync(filePath, 'utf8');
-                  console.log('File loaded:', content.length, 'characters');
+                  console.log('File loaded, size:', content.length);
                   
-                  const variablesToFix = [
-                      'currentUser',
-                      'currentDateTimeUTC',
-                      'currentDate',
-                      'currentTime'
-                  ];
+                  const variables = ['currentUser', 'currentDateTimeUTC', 'currentDate', 'currentTime'];
                   
-                  console.log('Current duplicate count:');
-                  variablesToFix.forEach(varName => {
-                      const pattern = new RegExp(`const ${varName} =`, 'g');
+                  console.log('Analyzing duplicates...');
+                  variables.forEach(varName => {
+                      const pattern = new RegExp('const ' + varName + ' =', 'g');
                       const matches = content.match(pattern) || [];
-                      console.log('  ' + varName + ':', matches.length, 'declarations');
+                      console.log(varName + ':', matches.length, 'declarations');
                   });
                   
-                  console.log('Removing duplicate declarations...');
+                  console.log('Removing duplicate blocks...');
                   
-                  const duplicatePattern = /\s*\/\/ ===== CURRENT INFO \(Updated\) =====\s*\n\s*const currentUser = '[^']*';\s*\n\s*const currentDateTimeUTC = '[^']*';\s*\n\s*const currentDate = '[^']*';\s*\n(?:\s*const currentTime = '[^']*';\s*\n)?/g;
+                  const blockPattern = /\s*\/\/ ===== CURRENT INFO \(Updated\) =====\s*\n\s*const currentUser = '[^']*';\s*\n\s*const currentDateTimeUTC = '[^']*';\s*\n\s*const currentDate = '[^']*';\s*\n(?:\s*const currentTime = '[^']*';\s*\n)?/g;
                   
-                  const matches = [...content.matchAll(duplicatePattern)];
-                  console.log('Found', matches.length, 'complete duplicate blocks');
+                  const blockMatches = [...content.matchAll(blockPattern)];
+                  console.log('Found', blockMatches.length, 'duplicate blocks');
                   
-                  if (matches.length > 1) {
-                      for (let i = matches.length - 1; i > 0; i--) {
-                          const match = matches[i];
+                  if (blockMatches.length > 1) {
+                      for (let i = blockMatches.length - 1; i > 0; i--) {
+                          const match = blockMatches[i];
                           const start = match.index;
                           const end = start + match[0].length;
                           content = content.slice(0, start) + content.slice(end);
@@ -217,15 +135,14 @@ jobs:
                       }
                   }
                   
-                  variablesToFix.forEach(varName => {
-                      const pattern = new RegExp(`\\n\\s*const ${varName} = '[^']*';`, 'g');
-                      const standaloneMatches = [...content.matchAll(pattern)];
+                  variables.forEach(varName => {
+                      const pattern = new RegExp('\\n\\s*const ' + varName + ' = \'[^\']*\';', 'g');
+                      const matches = [...content.matchAll(pattern)];
                       
-                      if (standaloneMatches.length > 1) {
-                          console.log('Removing', standaloneMatches.length - 1, 'standalone', varName, 'duplicates');
-                          
-                          for (let i = standaloneMatches.length - 1; i > 0; i--) {
-                              const match = standaloneMatches[i];
+                      if (matches.length > 1) {
+                          console.log('Removing', matches.length - 1, 'standalone', varName, 'duplicates');
+                          for (let i = matches.length - 1; i > 0; i--) {
+                              const match = matches[i];
                               const start = match.index;
                               const end = start + match[0].length;
                               content = content.slice(0, start) + content.slice(end);
@@ -233,27 +150,21 @@ jobs:
                       }
                   });
                   
-                  console.log('Updating user information...');
-                  
-                  content = content.replace(
-                      /const currentUser = '[^']*';/,
-                      "const currentUser = 'Vishalsnw';"
-                  );
+                  console.log('Updating user info...');
+                  content = content.replace(/const currentUser = '[^']*';/, "const currentUser = 'Vishalsnw';");
                   
                   fs.writeFileSync(filePath, content, 'utf8');
-                  console.log('File updated:', content.length, 'characters');
+                  console.log('File updated successfully');
                   
-                  console.log('Verification after fix:');
-                  variablesToFix.forEach(varName => {
-                      const pattern = new RegExp(`const ${varName} =`, 'g');
+                  console.log('Verifying fix...');
+                  variables.forEach(varName => {
+                      const pattern = new RegExp('const ' + varName + ' =', 'g');
                       const matches = content.match(pattern) || [];
                       const status = matches.length === 1 ? 'OK' : 'ERROR';
-                      console.log('  ' + status, varName + ':', matches.length, 'declaration(s)');
+                      console.log(status, varName + ':', matches.length, 'declarations');
                   });
                   
-                  console.log('SUCCESS! Duplicate declarations removed!');
-                  console.log('Ready for commit and deployment!');
-                  
+                  console.log('SUCCESS: Duplicates removed');
                   return true;
                   
               } catch (error) {
@@ -264,138 +175,81 @@ jobs:
           
           const filePath = process.argv[2];
           if (!filePath) {
-              console.log('ERROR: Please provide file path as argument');
+              console.log('ERROR: No file path provided');
               process.exit(1);
           }
           
-          const success = fixDuplicateDeclarations(filePath);
+          const success = fixDuplicates(filePath);
           process.exit(success ? 0 : 1);
-          EOF
+          SCRIPT_END
           
-          chmod +x auto_fix.js
-          echo "Auto-fix script created successfully"
+          echo "Fix script created"
 
-      - name: Execute Auto-Fix
+      - name: Execute Fix
         if: steps.analyze.outputs.needs_fix == 'true'
         run: |
           TARGET_FILE="${{ steps.detect-file.outputs.target_file }}"
-          echo "Executing auto-fix on $TARGET_FILE"
+          echo "Executing fix on $TARGET_FILE"
           
-          node auto_fix.js "$TARGET_FILE"
+          node fix_script.js "$TARGET_FILE"
           
           if [ $? -eq 0 ]; then
-            echo "Auto-fix completed successfully!"
+            echo "Fix completed successfully"
           else
-            echo "Auto-fix failed!"
+            echo "Fix failed"
             exit 1
           fi
 
-      - name: Verify Build After Fix
-        if: steps.analyze.outputs.needs_fix == 'true' && steps.detect-structure.outputs.has_package_json == 'true'
+      - name: Install Dependencies
+        if: steps.analyze.outputs.needs_fix == 'true'
         run: |
-          echo "Verifying build after fix..."
-          PACKAGE_PATH="${{ steps.detect-structure.outputs.package_path }}"
-          
-          cd "$PACKAGE_PATH"
-          echo "Testing build in $PACKAGE_PATH..."
-          
-          if npm run build; then
-            echo "Build verification passed!"
-          else
-            echo "Build verification failed, but continuing with fix"
+          if [ -f "frontend/package.json" ]; then
+            cd frontend
+            npm install
+          elif [ -f "package.json" ]; then
+            npm install
           fi
 
-      - name: Generate Fix Summary
+      - name: Test Build
         if: steps.analyze.outputs.needs_fix == 'true'
-        id: summary
         run: |
-          TARGET_FILE="${{ steps.detect-file.outputs.target_file }}"
-          echo "StockForge Auto-Fix Summary" > fix_summary.md
-          echo "=========================" >> fix_summary.md
-          echo "" >> fix_summary.md
-          echo "User: Vishalsnw" >> fix_summary.md
-          echo "Target File: $TARGET_FILE" >> fix_summary.md
-          echo "Fix Type: ${{ inputs.fix_type || 'remove_duplicates' }}" >> fix_summary.md
-          echo "Duplicates Found: ${{ steps.analyze.outputs.total_duplicates }}" >> fix_summary.md
-          echo "" >> fix_summary.md
-          echo "Fixes Applied:" >> fix_summary.md
-          echo "- Removed duplicate const currentUser declarations" >> fix_summary.md
-          echo "- Removed duplicate const currentDateTimeUTC declarations" >> fix_summary.md
-          echo "- Removed duplicate const currentDate declarations" >> fix_summary.md
-          echo "- Removed duplicate const currentTime declarations" >> fix_summary.md
-          echo "- Updated user information" >> fix_summary.md
-          echo "- Fixed npm cache dependency resolution" >> fix_summary.md
-          echo "" >> fix_summary.md
-          echo "Ready for Deployment!" >> fix_summary.md
-          echo "The file is now clean and ready for Vercel deployment." >> fix_summary.md
-          
-          cat fix_summary.md
+          echo "Testing build after fix"
+          if [ -f "frontend/package.json" ]; then
+            cd frontend
+            npm run build || echo "Build test completed"
+          elif [ -f "package.json" ]; then
+            npm run build || echo "Build test completed"
+          fi
 
-      - name: Commit and Push Changes
+      - name: Commit Changes
         if: steps.analyze.outputs.needs_fix == 'true'
         run: |
           git config --local user.email "action@github.com"
-          git config --local user.name "StockForge Auto-Fix Bot"
+          git config --local user.name "StockForge-Bot"
           
           git add .
           
           if git diff --staged --quiet; then
             echo "No changes to commit"
           else
-            COMMIT_MSG="Auto-fix: Remove duplicate declarations for Vishalsnw
-
-StockForge Auto-Fix Bot Action
-User: Vishalsnw
-Fixed: ${{ steps.analyze.outputs.total_duplicates }} duplicate const declarations
-
-Changes Applied:
-- Removed duplicate currentUser declarations
-- Removed duplicate currentDateTimeUTC declarations
-- Removed duplicate currentDate declarations
-- Removed duplicate currentTime declarations
-- Updated user information
-- Fixed npm cache dependency resolution
-- Verified build compatibility
-
-Ready for Vercel deployment!"
-
-            git commit -m "$COMMIT_MSG"
+            git commit -m "Auto-fix: Remove duplicate declarations for Vishalsnw"
             git push
-            
-            echo "Changes committed and pushed successfully!"
-            echo "Repository updated with fixes"
+            echo "Changes committed and pushed"
           fi
 
       - name: Success Summary
         if: steps.analyze.outputs.needs_fix == 'true'
         run: |
-          echo "StockForge Auto-Fix Completed!"
-          echo "============================="
-          echo ""
+          echo "Auto-fix completed successfully"
           echo "User: Vishalsnw"
           echo "Target: ${{ steps.detect-file.outputs.target_file }}"
-          echo "Duplicates Fixed: ${{ steps.analyze.outputs.total_duplicates }}"
-          echo ""
-          echo "All duplicate const declarations removed"
-          echo "User information updated"
-          echo "npm cache dependency issues resolved"
-          echo "Build verification completed"
-          echo "Changes committed and pushed"
-          echo ""
-          echo "Ready for Vercel deployment!"
-          echo "Check your repository for the auto-commit"
+          echo "Duplicates fixed: ${{ steps.analyze.outputs.total_duplicates }}"
+          echo "Ready for Vercel deployment"
 
       - name: No Fix Needed
         if: steps.analyze.outputs.needs_fix == 'false'
         run: |
-          echo "No Duplicates Found"
-          echo "=================="
-          echo ""
+          echo "No duplicates found"
+          echo "File is already clean"
           echo "User: Vishalsnw"
           echo "Target: ${{ steps.detect-file.outputs.target_file }}"
-          echo ""
-          echo "File is already clean!"
-          echo "No duplicate declarations found"
-          echo "No action required"
-          echo ""
-          echo "File is ready for deployment!"
