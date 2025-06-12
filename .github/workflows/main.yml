@@ -1,101 +1,39 @@
-name: Final App Cleanup
+name: 🔧 Auto Fix useBotMarket.js
 
 on:
   workflow_dispatch:
-    inputs:
-      user_name:
-        description: Target User
-        required: false
-        default: Vishalsnw
-        type: string
 
 jobs:
-  final-cleanup:
-    name: Final Cleanup
+  fix-usebotmarket:
     runs-on: ubuntu-latest
-    
     steps:
-      - name: Checkout
+      - name: ⬇️ Checkout repo
         uses: actions/checkout@v4
 
-      - name: Remove Old App.js File
+      - name: 🛠️ Auto-fix undefined vars
         run: |
-          echo "Removing old App.js file that causes conflicts..."
-          
-          # Check if App.js exists
-          if [ -f "frontend/src/App.js" ]; then
-            echo "Found App.js - removing it"
-            rm frontend/src/App.js
-            echo "App.js removed"
-          else
-            echo "App.js not found"
+          TARGET="src/hooks/useBotMarket.js"
+
+          echo "🔍 Fixing $TARGET"
+
+          if [ ! -f "$TARGET" ]; then
+            echo "❌ $TARGET not found"
+            exit 1
           fi
-          
-          # List remaining App files
-          echo "Remaining App files:"
-          ls -la frontend/src/App.* || echo "No App files found"
 
-      - name: Ensure Correct App.jsx Import
-        run: |
-          echo "Ensuring main.jsx imports App.jsx..."
-          
-          # Make sure main.jsx imports App.jsx
-          sed -i "s|import App from './App.js'|import App from './App.jsx'|g" frontend/src/main.jsx
-          sed -i "s|import App from './App'|import App from './App.jsx'|g" frontend/src/main.jsx
-          
-          echo "Import path verified in main.jsx"
-          
-          # Show the import line
-          grep -n "import App" frontend/src/main.jsx
+          # Fix undefined 'currentDateTimeUTC' → replace with getCurrentTime()
+          sed -i "s/\bcurrentDateTimeUTC\b/getCurrentTime()/g" "$TARGET"
 
-      - name: Clean Build Directory
-        run: |
-          echo "Cleaning any cached build files..."
-          
-          cd frontend
-          
-          # Remove build cache
-          rm -rf dist/
-          rm -rf node_modules/.vite/
-          
-          echo "Build cache cleaned"
+          # Fix undefined 'currentDate' → replace with sessionStartTime.split(' ')[0]
+          sed -i "s/\bcurrentDate\b/sessionStartTime.split(' ')[0]/g" "$TARGET"
 
-      - name: Test Build
-        run: |
-          cd frontend
-          
-          echo "Installing dependencies..."
-          npm install
-          
-          echo "Running build test..."
-          npm run build
+          echo "✅ Variables replaced in $TARGET"
 
-      - name: Commit Final Changes
+      - name: ✅ Commit and push fix
         run: |
+          git config user.name "StockForge Auto-Fix Bot"
           git config user.email "action@github.com"
-          git config user.name "Bot"
-          
-          git add .
-          
-          if ! git diff --staged --quiet; then
-            git commit -m "Final cleanup: Remove App.js, keep only App.jsx - Vishalsnw - 2025-06-12 15:23:42"
-            git push
-            echo "Final cleanup committed and pushed"
-          else
-            echo "No changes to commit"
-          fi
 
-      - name: Success Summary
-        run: |
-          echo "FINAL CLEANUP COMPLETED"
-          echo "======================"
-          echo "User: Vishalsnw"
-          echo "Time: 2025-06-12 15:23:42 UTC"
-          echo ""
-          echo "Final State:"
-          echo "- ❌ App.js (removed - was causing JSX errors)"
-          echo "- ✅ App.jsx (simplified, working)"
-          echo "- ✅ main.jsx imports App.jsx"
-          echo "- ✅ Build should succeed"
-          echo ""
-          echo "StockForge ready for deployment!"
+          git add src/hooks/useBotMarket.js
+          git commit -m "🚑 Auto-fix undefined vars in useBotMarket.js"
+          git push
