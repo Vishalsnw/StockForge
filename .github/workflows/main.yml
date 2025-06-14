@@ -1,26 +1,36 @@
-name: Cleanup Repository
+name: Scaffold New SimCompanies Repo
 
 on:
   workflow_dispatch:
 
 jobs:
-  delete-all-files:
+  scaffold-folders:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Remove all files and folders except .git and .github
+      - name: Set up folder structure for backend and frontend
         run: |
-          shopt -s extglob
-          rm -rf !(.git|.github)
+          mkdir -p backend/models
+          mkdir -p backend/routes
+          mkdir -p backend/controllers
+          mkdir -p backend/services
+          mkdir -p backend/seed
+          mkdir -p frontend/components/Company
+          mkdir -p frontend/components/IPO
+          mkdir -p frontend/components/StockExchange
+          mkdir -p frontend/components/CommodityExchange
+          mkdir -p frontend/components/Dashboard
+          mkdir -p frontend/components/Bot
+          mkdir -p frontend/context
+          mkdir -p frontend/pages
+          mkdir -p frontend/hooks
+          mkdir -p frontend/public
+          mkdir -p frontend/src
+          mkdir -p .github/workflows
 
-      - name: Commit and push changes
+      - name: Create .gitkeep files so folders are tracked
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add -A
-          git commit -m "Delete all files and folders except .github"
-          git push
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          find backend -type d -exec touch {}/.gitkeep \;
+          find frontend -type d -exec touch {}/.gitkeep \;
