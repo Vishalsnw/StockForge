@@ -1,39 +1,26 @@
-name: 🔧 Auto Fix useBotMarket.js
+name: Cleanup Repository
 
 on:
   workflow_dispatch:
 
 jobs:
-  fix-usebotmarket:
+  delete-all-files:
     runs-on: ubuntu-latest
     steps:
-      - name: ⬇️ Checkout repo
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: 🛠️ Auto-fix undefined vars
+      - name: Remove all files and folders except .git and .github
         run: |
-          TARGET="frontend/src/hooks/useBotMarket.js"
+          shopt -s extglob
+          rm -rf !(.git|.github)
 
-          echo "🔍 Fixing $TARGET"
-
-          if [ ! -f "$TARGET" ]; then
-            echo "❌ $TARGET not found"
-            exit 1
-          fi
-
-          # Fix undefined 'currentDateTimeUTC' → replace with getCurrentTime()
-          sed -i "s/\bcurrentDateTimeUTC\b/getCurrentTime()/g" "$TARGET"
-
-          # Fix undefined 'currentDate' → replace with sessionStartTime.split(' ')[0]
-          sed -i "s/\bcurrentDate\b/sessionStartTime.split(' ')[0]/g" "$TARGET"
-
-          echo "✅ Variables replaced in $TARGET"
-
-      - name: ✅ Commit and push fix
+      - name: Commit and push changes
         run: |
-          git config user.name "StockForge Auto-Fix Bot"
-          git config user.email "action@github.com"
-
-          git add frontend/src/hooks/useBotMarket.js
-          git commit -m "🚑 Auto-fix undefined vars in useBotMarket.js"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Delete all files and folders except .github"
           git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
