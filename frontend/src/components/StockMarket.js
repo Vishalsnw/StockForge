@@ -5,14 +5,26 @@ export default function StockMarket() {
   return (
     <div>
       <h1>Stock Market</h1>
-      <p>Trade shares of these companies:</p>
-      <ul>
-        {companies.map((c) => (
-          <li key={c.id}>
-            {c.name} ({c.symbol}) — ₹{c.sharePrice.toFixed(2)}
-          </li>
-        ))}
-      </ul>
+      <table>
+        <thead>
+          <tr>
+            <th>Company</th>
+            <th>Symbol</th>
+            <th>Share Price</th>
+            <th>Shares</th>
+          </tr>
+        </thead>
+        <tbody>
+          {companies.map((c) => (
+            <tr key={c.id}>
+              <td>{c.name}</td>
+              <td>{c.symbol}</td>
+              <td>₹{c.sharePrice.toFixed(2)}</td>
+              <td>{c.shares}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }

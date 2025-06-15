@@ -26,7 +26,9 @@ export default function CommodityMarket() {
         <tbody>
           {orders.length === 0 && (
             <tr>
-              <td colSpan={4} style={{textAlign:"center",color:"#888"}}>No commodity orders available.</td>
+              <td colSpan={4} style={{ textAlign: "center", color: "#888" }}>
+                No commodity orders available.
+              </td>
             </tr>
           )}
           {orders.map((o, i) => (
