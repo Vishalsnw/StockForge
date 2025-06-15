@@ -1,4 +1,4 @@
-name: Check for Placeholder Files
+name: Check CSS Imports in Components
 
 on:
   push:
@@ -7,30 +7,44 @@ on:
     branches: [main, master]
 
 jobs:
-  check-placeholders:
+  check-css-imports:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Search for placeholder files
+      - name: Find all JS/JSX files and their matching CSS files
+        id: files
         run: |
-          # List of placeholder keywords to search for
-          PLACEHOLDER_PATTERNS=(
-            "<h1>.*(Home|Company|Market|Profile|Dashboard|Welcome|Page).*</h1>"
-            "<p>.*(Build|Welcome|Coming soon|See top players).*</p>"
-            "PLACEHOLDER"
-            "TODO"
-          )
-          FOUND=0
-          for pattern in "${PLACEHOLDER_PATTERNS[@]}"; do
-            if grep -rEn --include="*.js" --include="*.jsx" --include="*.ts" --include="*.tsx" "$pattern" src/; then
-              echo "::error file=src::Placeholder pattern found: $pattern"
-              FOUND=1
+          cd frontend/src
+          # Find all .js and .jsx files
+          find . -type f \( -name "*.js" -o -name "*.jsx" \) > js_files.txt
+          # For each JS file, check if a CSS file of the same base name exists
+          touch missing_css_imports.txt
+          while read jsfile; do
+            # Get base name without extension
+            base=$(basename "$jsfile" .js)
+            basex=$(basename "$jsfile" .jsx)
+            cssfile="$(dirname "$jsfile")/$base.css"
+            cssfilex="$(dirname "$jsfile")/$basex.css"
+            # If CSS file exists, check if JS file imports it
+            if [ -f "$cssfile" ]; then
+              if ! grep -q "import [\"']\\.?\\/?$base\\.css[\"']" "$jsfile"; then
+                echo "$jsfile is missing import for $base.css" >> missing_css_imports.txt
+              fi
+            elif [ -f "$cssfilex" ]; then
+              if ! grep -q "import [\"']\\.?\\/?$basex\\.css[\"']" "$jsfile"; then
+                echo "$jsfile is missing import for $basex.css" >> missing_css_imports.txt
+              fi
             fi
-          done
-          if [ $FOUND -ne 0 ]; then
-            echo "❌ Placeholder content found in source files."
+          done < js_files.txt
+          
+      - name: Fail if any CSS imports are missing
+        run: |
+          if [ -s frontend/src/missing_css_imports.txt ]; then
+            echo "❌ Missing CSS imports detected:"
+            cat frontend/src/missing_css_imports.txt
             exit 1
+          else
+            echo "✅ All component CSS files are correctly imported."
           fi
-          echo "✅ No placeholder content found."
