@@ -8,7 +8,7 @@ export default function Market() {
       <table>
         <thead>
           <tr>
-            <th>Name</th>
+            <th>Company</th>
             <th>Sector</th>
             <th>Symbol</th>
             <th>Share Price</th>
