@@ -1,55 +1,78 @@
-name: Auto-fix Missing CSS Imports
+name: Debug CSS Loading
 
 on:
   workflow_dispatch:
-  push:
-    branches: [main, master]
 
 jobs:
-  autofix-css-imports:
+  debug-css:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          ref: ${{ github.head_ref }}
-          token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Install GNU sed (for macOS compatibility)
-        run: sudo apt-get update && sudo apt-get install -y sed
-
-      - name: Auto-inject missing CSS imports
+      - name: List directory structure
         run: |
-          cd frontend/src
-          find . -type f \( -name "*.js" -o -name "*.jsx" \) > js_files.txt
-          injected_any=0
-          while read jsfile; do
+          echo "Directory structure:"
+          tree frontend/src || find frontend/src
+
+      - name: List all CSS, JS, and JSX files
+        run: |
+          echo "All CSS files:"
+          find frontend/src -type f -name "*.css"
+          echo "All JS files:"
+          find frontend/src -type f -name "*.js"
+          echo "All JSX files:"
+          find frontend/src -type f -name "*.jsx"
+
+      - name: Show first 10 lines of each JS/JSX file
+        run: |
+          echo "First 10 lines of each JS/JSX file (looking for CSS imports):"
+          for f in $(find frontend/src -type f \( -name "*.js" -o -name "*.jsx" \)); do
+            echo "==== $f ===="
+            head -10 "$f"
+            echo
+          done
+
+      - name: Show first 10 lines of each CSS file
+        run: |
+          echo "First 10 lines of each CSS file (checking for content):"
+          for f in $(find frontend/src -type f -name "*.css"); do
+            echo "==== $f ===="
+            head -10 "$f"
+            echo
+          done
+
+      - name: Check for missing CSS files or imports
+        run: |
+          echo "Checking for missing CSS files or imports..."
+          missing=0
+          for jsfile in $(find frontend/src -type f \( -name "*.js" -o -name "*.jsx" \)); do
             base=$(basename "$jsfile" .js)
             basex=$(basename "$jsfile" .jsx)
-            cssfile="$(dirname "$jsfile")/$base.css"
-            cssfilex="$(dirname "$jsfile")/$basex.css"
-            target=""
-            [ -f "$cssfile" ] && target="$base.css"
-            [ -f "$cssfilex" ] && target="$basex.css"
-            if [ -n "$target" ]; then
-              # Check if already imported
-              if ! grep -q "import [\"']\\.?\\/?$target[\"']" "$jsfile"; then
-                # Insert import at the first line
-                sed -i "1iimport './$target';" "$jsfile"
-                echo "Injected import './$target'; into $jsfile"
-                injected_any=1
-              fi
-            fi
-          done < js_files.txt
-          exit $injected_any
+            dir=$(dirname "$jsfile")
+            cssfile1="$dir/$base.css"
+            cssfile2="$dir/$basex.css"
 
-      - name: Commit and Push changes
-        if: ${{ failure() }}
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add .
-          git commit -m "chore: auto-inject missing component CSS imports"
-          git push
+            if [ -f "$cssfile1" ]; then
+              if ! grep -q "import .*/$base.css" "$jsfile" && ! grep -q "import .*$base.css" "$jsfile"; then
+                echo "❌ $jsfile exists but does NOT import $base.css"
+                missing=1
+              fi
+            elif [ -f "$cssfile2" ]; then
+              if ! grep -q "import .*/$basex.css" "$jsfile" && ! grep -q "import .*$basex.css" "$jsfile"; then
+                echo "❌ $jsfile exists but does NOT import $basex.css"
+                missing=1
+              fi
+            else
+              echo "⚠️  No CSS file found for $jsfile"
+            fi
+          done
+
+          if [ $missing -eq 0 ]; then
+            echo "✅ All JS/JSX files with matching CSS have correct imports."
+          else
+            echo "Some imports are missing or CSS files are missing."
+          fi
+
+      - name: Output summary
+        run: echo "Check above logs for details. Attach this log if asking for help."
