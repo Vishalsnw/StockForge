@@ -1,56 +1,28 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useEffect, useRef } from "react";
+import { marketBots } from "./botsData";
 
-// Context to share market state across your app
-const MarketContext = createContext();
+// Context to provide market bots simulation globally
+const MarketBotContext = createContext();
 
-export function useMarket() {
-  return useContext(MarketContext);
-}
-
-/**
- * MarketBot simulates commodity/stock price changes.
- * It generates new prices at intervals and provides them via context.
- */
 export function MarketBotProvider({ children }) {
-  const [marketData, setMarketData] = useState({
-    stocks: [
-      { symbol: "ACME", name: "Acme Corp", price: 233 },
-      { symbol: "FOOD", name: "FoodWorks", price: 87 },
-      { symbol: "OILX", name: "OilX Ltd.", price: 153 }
-    ],
-    commodities: [
-      { name: "Iron Ore", price: 120 },
-      { name: "Oil", price: 72 },
-      { name: "Wheat", price: 18 }
-    ]
-  });
+  // You can expand this to have bots actually trade (random or AI logic)
+  // For demo, we just provide bot/company data globally
+  const botsRef = useRef(marketBots);
 
-  // Simulate price updates every 5 seconds
+  // (Optional) Add effect for bots to place random orders in background
   useEffect(() => {
-    const interval = setInterval(() => {
-      setMarketData((prev) => ({
-        stocks: prev.stocks.map((stock) => ({
-          ...stock,
-          price: Math.max(
-            1,
-            +(stock.price * (1 + (Math.random() - 0.5) * 0.04)).toFixed(2)
-          )
-        })),
-        commodities: prev.commodities.map((comm) => ({
-          ...comm,
-          price: Math.max(
-            1,
-            +(comm.price * (1 + (Math.random() - 0.5) * 0.05)).toFixed(2)
-          )
-        }))
-      }));
-    }, 5000);
-    return () => clearInterval(interval);
+    // e.g., setInterval to simulate activity
   }, []);
 
   return (
-    <MarketContext.Provider value={marketData}>
+    <MarketBotContext.Provider value={{
+      bots: botsRef.current,
+    }}>
       {children}
-    </MarketContext.Provider>
+    </MarketBotContext.Provider>
   );
+}
+
+export function useMarketBots() {
+  return useContext(MarketBotContext);
 }
