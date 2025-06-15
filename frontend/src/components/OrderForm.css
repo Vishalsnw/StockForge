@@ -32,6 +32,12 @@
   color: #ffe39a;
   padding: 6px 9px;
   font-size: 1rem;
+  transition: border 0.2s;
+}
+.order-form-row input:focus,
+.order-form-row select:focus {
+  border: 1.5px solid #13d47e;
+  outline: none;
 }
 .order-form-error {
   color: #ff7a7a;
@@ -50,8 +56,10 @@
   color: #fff;
   font-weight: bold;
   cursor: pointer;
-  transition: background 0.2s;
+  box-shadow: 0 2px 8px #12a7fe33;
+  transition: background 0.2s, box-shadow 0.2s;
 }
 .order-form-btn:hover {
   background: linear-gradient(90deg, #12a7fe, #13d47e);
+  box-shadow: 0 4px 16px #13d47e44;
 }

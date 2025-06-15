@@ -16,6 +16,11 @@
   position: relative;
   min-width: 330px;
   max-width: 90vw;
+  animation: scaleIn 0.15s;
+}
+@keyframes scaleIn {
+  from { transform: scale(0.93);}
+  to { transform: scale(1);}
 }
 .order-modal-close {
   position: absolute;
@@ -26,6 +31,10 @@
   color: #ffe39a;
   font-size: 1.5rem;
   cursor: pointer;
+  transition: color 0.2s;
+}
+.order-modal-close:hover {
+  color: #fff;
 }
 @keyframes fadeIn {
   from { opacity: 0;}

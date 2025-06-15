@@ -9,6 +9,7 @@
 }
 .leaderboard h2 {
   margin-bottom: 1.2rem;
+  color: #2774ae;
 }
 .leaderboard table {
   width: 100%;
@@ -18,6 +19,10 @@
   padding: 8px 12px;
   border-bottom: 1px solid #eef2f7;
   text-align: left;
+  font-size: 1.07rem;
+}
+.leaderboard tr:last-child td {
+  border-bottom: none;
 }
 .leaderboard .first-place td {
   font-weight: bold;

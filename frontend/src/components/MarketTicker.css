@@ -7,6 +7,7 @@
   border-bottom: 1px solid #28335b;
   overflow-x: auto;
   white-space: nowrap;
+  box-shadow: 0 2px 8px #0002;
 }
 .ticker-inner {
   display: flex;
@@ -16,10 +17,12 @@
 .ticker-up {
   color: #6cffb0;
   margin-right: 2rem;
+  font-weight: 600;
 }
 .ticker-down {
   color: #ff8787;
   margin-right: 2rem;
+  font-weight: 600;
 }
 @keyframes ticker-move {
   0% { transform: translateX(0);}

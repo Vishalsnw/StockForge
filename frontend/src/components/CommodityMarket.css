@@ -20,6 +20,16 @@
   margin-top: 1.5rem;
   flex-wrap: wrap;
 }
+/* Blinking for commodity price cells */
+.blink {
+  animation: blinkAnim 0.5s linear;
+  background: #ffe082;
+}
+@keyframes blinkAnim {
+  0% { background: #ffe082; }
+  50% { background: #fff; }
+  100% { background: #ffe082; }
+}
 @media (max-width: 900px) {
   .exchange-panel-grid {
     flex-direction: column;

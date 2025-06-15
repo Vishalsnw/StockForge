@@ -19,4 +19,12 @@
 }
 .dashboard-widget {
   flex: 1;
+  background: #f0f4fa;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px #0001;
+  padding: 1.2rem 1.3rem;
+  transition: box-shadow 0.2s;
+}
+.dashboard-widget:hover {
+  box-shadow: 0 4px 16px #2774ae22;
 }
