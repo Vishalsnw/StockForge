@@ -7,13 +7,13 @@ export default function CommodityMarket() {
   useEffect(() => {
     const interval = setInterval(() => {
       setOrders([...commodityOrders]);
-    }, 1200); // fast refresh
+    }, 1200);
     return () => clearInterval(interval);
   }, []);
 
   return (
-    <div className="commodity-market">
-      <h2>Commodity Exchange</h2>
+    <div>
+      <h1>Commodity Exchange</h1>
       <table>
         <thead>
           <tr>
@@ -26,10 +26,10 @@ export default function CommodityMarket() {
         <tbody>
           {orders.length === 0 && (
             <tr>
-              <td colSpan={4} style={{textAlign:"center",color:"#888",fontStyle:"italic"}}>No commodity orders available.</td>
+              <td colSpan={4} style={{textAlign:"center",color:"#888"}}>No commodity orders available.</td>
             </tr>
           )}
-          {orders.map((o,i) => (
+          {orders.map((o, i) => (
             <tr key={i}>
               <td>{o.commodity}</td>
               <td>₹{o.price.toFixed(2)}</td>
