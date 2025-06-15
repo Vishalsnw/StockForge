@@ -1,12 +1,13 @@
 import React from "react";
-import Portfolio from "../components/Portfolio";
-
+import { useUser } from "../context/UserContext";
 export default function Profile() {
-  // You can add more user info and stats here in the future
+  const { user } = useUser();
   return (
-    <div style={{ maxWidth: 500, margin: "2rem auto" }}>
-      <h2>Your Profile</h2>
-      <Portfolio />
+    <div>
+      <h1>Your Profile</h1>
+      <p>Name: {user.name}</p>
+      <p>Balance: ₹{user.balance}</p>
+      <p>Companies owned: {user.companies && user.companies.length}</p>
     </div>
   );
 }
