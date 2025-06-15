@@ -1,15 +1,23 @@
 import React, { useState } from "react";
 import { sectors } from "../data/sectors";
-import { companies } from "../data/companies";
+import { addCompany } from "../data/companies";
+import { useUser } from "../context/UserContext";
 
 export default function RegisterCompanyModal({ open, onClose, onRegister }) {
   const [name, setName] = useState("");
   const [sector, setSector] = useState(sectors[0].name);
   const [capital, setCapital] = useState(100000);
+  const [error, setError] = useState("");
+  const { user, deductBalance, addCompany: addCompanyId } = useUser();
 
   function handleSubmit(e) {
     e.preventDefault();
+    setError("");
     if (!name) return;
+    if (capital > user.balance) {
+      setError("Insufficient balance to register company.");
+      return;
+    }
     const sectorData = sectors.find(s => s.name === sector);
     const symbol = (name.slice(0, 3) + sector.slice(0, 2) + Date.now()%1000).toUpperCase();
     const company = {
@@ -25,8 +33,10 @@ export default function RegisterCompanyModal({ open, onClose, onRegister }) {
       sharePrice: 10,
       isBot: false
     };
-    companies.push(company);
-    onRegister(company);
+    addCompany(company);
+    deductBalance(capital);
+    addCompanyId(company.id);
+    onRegister && onRegister(company);
     onClose();
   }
 
@@ -49,6 +59,7 @@ export default function RegisterCompanyModal({ open, onClose, onRegister }) {
           Starting Capital:
           <input type="number" value={capital} onChange={e => setCapital(Number(e.target.value))} min={10000} required />
         </label>
+        {error && <div style={{color:"red",marginBottom:"0.7rem"}}>{error}</div>}
         <button type="submit">Create Company</button>
       </form>
     </div>
