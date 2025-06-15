@@ -1,5 +1,3 @@
-// Companies array + addCompany helper, with localStorage persistence
-
 const STORAGE_KEY = "market_companies";
 
 function loadCompanies() {
@@ -18,7 +16,6 @@ function saveCompanies(companies) {
   } catch {}
 }
 
-// Companies array (exported, always in sync with localStorage)
 export let companies = loadCompanies();
 
 export function addCompany(company) {
