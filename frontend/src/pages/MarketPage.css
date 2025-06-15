@@ -25,8 +25,10 @@
   font-size: 1.1rem;
   margin-bottom: 1.5rem;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: background 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 8px #13d47e22;
 }
 .market-page button:hover {
   background: #12a7fe;
+  box-shadow: 0 4px 16px #12a7fe33;
 }
