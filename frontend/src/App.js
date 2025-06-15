@@ -18,13 +18,11 @@ function App() {
         <div className="app-layout">
           <NavigationBar />
           <div className="app-content">
-            {/* Sidebar removed to focus on professional exchange UI */}
             <main className="main-panel">
               <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/company" element={<Company />} />
                 <Route path="/market" element={<Market />} />
-                {/* Use new professional exchange pages */}
                 <Route path="/stock" element={<StockMarket />} />
                 <Route path="/commodity" element={<CommodityMarket />} />
                 <Route path="/leaderboard" element={<Leaderboard />} />
