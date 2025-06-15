@@ -1,0 +1,57 @@
+.order-form {
+  background: #1a2330;
+  color: #f4f7fa;
+  border-radius: 10px;
+  padding: 1.2rem 1.4rem 1.1rem 1.4rem;
+  margin-bottom: 1.2rem;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  width: 100%;
+  max-width: 350px;
+  box-shadow: 0 2px 8px #0002;
+}
+.order-form h4 {
+  margin-bottom: 1rem;
+  color: #ffe39a;
+}
+.order-form-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.8rem;
+  gap: 1rem;
+}
+.order-form-row label {
+  min-width: 90px;
+  font-weight: 500;
+}
+.order-form-row input,
+.order-form-row select {
+  flex: 1;
+  border-radius: 5px;
+  border: 1px solid #32415b;
+  background: #111723;
+  color: #ffe39a;
+  padding: 6px 9px;
+  font-size: 1rem;
+}
+.order-form-error {
+  color: #ff7a7a;
+  margin-bottom: 0.7rem;
+  margin-top: -0.4rem;
+  font-size: 0.97rem;
+}
+.order-form-btn {
+  width: 100%;
+  margin-top: 0.6rem;
+  padding: 0.6rem 0;
+  border-radius: 7px;
+  border: none;
+  font-size: 1rem;
+  background: linear-gradient(90deg, #13d47e, #12a7fe);
+  color: #fff;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.order-form-btn:hover {
+  background: linear-gradient(90deg, #12a7fe, #13d47e);
+}
