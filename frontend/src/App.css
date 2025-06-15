@@ -1,20 +1,84 @@
-.app-layout {
-  min-height: 100vh;
+/* Core Layout */
+body, html {
+  height: 100%;
+  margin: 0;
   background: #e9eef4;
   font-family: 'Segoe UI', Arial, sans-serif;
+}
+.app-layout {
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
+  background: #e9eef4;
 }
 .app-content {
-  display: flex;
   flex: 1;
-  min-height: 0;
+  display: flex;
+  justify-content: center;
+  padding: 2rem 0;
 }
 .main-panel {
   flex: 1;
-  padding: 2rem 3vw 2rem 2vw;
-  min-width: 0;
+  max-width: 900px;
+  margin: 0 auto;
+  width: 100%;
+  padding: 2rem;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 8px 40px 0 #2774ae15;
+  min-height: 65vh;
 }
+
+/* Navbar */
+.navbar {
+  background: #222e3c;
+  padding: 0.75rem 1.2rem;
+  color: #fff;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 8px #1f2d3d10;
+}
+.navbar a {
+  color: #fff;
+  text-decoration: none;
+  margin-right: 1.7rem;
+  transition: color 0.15s;
+}
+.navbar a:hover, .navbar .active {
+  color: #ffe082;
+  font-weight: 600;
+}
+
+/* Headings & Welcome Section */
+h1, h2, h3 {
+  color: #2774ae;
+  font-weight: 700;
+  margin-bottom: 0.5em;
+  letter-spacing: 0.5px;
+}
+
+.welcome {
+  background: linear-gradient(90deg, #e9eef4 70%, #d3e4ff 100%);
+  border-radius: 12px;
+  box-shadow: 0 1px 8px #2774ae12;
+  padding: 2.2rem 2rem 2rem 2rem;
+  margin-bottom: 2rem;
+  text-align: left;
+}
+.welcome h1 {
+  font-size: 2.3rem;
+  margin-top: 0;
+}
+.welcome p {
+  font-size: 1.25rem;
+  color: #222e3c;
+  margin-top: 0.5em;
+}
+
+/* Table Styling */
 .table-container {
   background: #fff;
   border-radius: 12px;
@@ -51,7 +115,8 @@ tr:hover td {
   background: #e6f0fa;
   transition: background 0.2s;
 }
-/* Blinking price animation */
+
+/* Blinking price animation (for stock/commodity prices) */
 .blink {
   animation: blinkAnim 0.5s linear;
   background: #ffe082;
@@ -61,7 +126,8 @@ tr:hover td {
   50% { background: #fff; }
   100% { background: #ffe082; }
 }
-/* Button styling */
+
+/* Buttons */
 button {
   background: #2774ae;
   color: #fff;
@@ -83,12 +149,33 @@ input, select {
   border-radius: 4px;
   font-size: 1em;
 }
-h1, h2, h3 {
-  font-family: 'Segoe UI', Arial, sans-serif;
-  color: #2774ae;
-  font-weight: 700;
-  margin-bottom: 1rem;
+
+/* Responsive */
+@media (max-width: 900px) {
+  .main-panel {
+    max-width: 98vw;
+    padding: 1.2rem;
+  }
+  .app-content {
+    padding: 1rem 0;
+  }
 }
+@media (max-width: 600px) {
+  .main-panel {
+    padding: 0.5rem;
+  }
+  .welcome {
+    padding: 1.2rem 0.7rem 1.1rem 0.7rem;
+    font-size: 1rem;
+  }
+  .navbar {
+    font-size: 1rem;
+    padding: 0.65rem 0.5rem;
+    gap: 1rem;
+  }
+}
+
+/* Utility */
 ::-webkit-scrollbar {
   width: 8px;
   background: #e9eef4;
@@ -96,4 +183,4 @@ h1, h2, h3 {
 ::-webkit-scrollbar-thumb {
   background: #d3dae6;
   border-radius: 6px;
-}
+  }
