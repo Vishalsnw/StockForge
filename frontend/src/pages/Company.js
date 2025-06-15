@@ -1,10 +1,4 @@
 import React from "react";
-import CompanyPanel from "../components/CompanyPanel";
-
 export default function Company() {
-  return (
-    <div>
-      <CompanyPanel />
-    </div>
-  );
+  return <div><h1>Company Dashboard</h1></div>;
 }
