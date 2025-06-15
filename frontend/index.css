@@ -8,6 +8,10 @@ body {
   min-height: 100vh;
 }
 a {
-  color: inherit;
+  color: #2774ae;
   text-decoration: none;
+  transition: color 0.2s;
+}
+a:hover {
+  color: #13d47e;
 }
