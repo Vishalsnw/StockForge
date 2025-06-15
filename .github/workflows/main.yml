@@ -1,50 +1,55 @@
-name: Check CSS Imports in Components
+name: Auto-fix Missing CSS Imports
 
 on:
+  workflow_dispatch:
   push:
-    branches: [main, master]
-  pull_request:
     branches: [main, master]
 
 jobs:
-  check-css-imports:
+  autofix-css-imports:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Find all JS/JSX files and their matching CSS files
-        id: files
+      - name: Install GNU sed (for macOS compatibility)
+        run: sudo apt-get update && sudo apt-get install -y sed
+
+      - name: Auto-inject missing CSS imports
         run: |
           cd frontend/src
-          # Find all .js and .jsx files
           find . -type f \( -name "*.js" -o -name "*.jsx" \) > js_files.txt
-          # For each JS file, check if a CSS file of the same base name exists
-          touch missing_css_imports.txt
+          injected_any=0
           while read jsfile; do
-            # Get base name without extension
             base=$(basename "$jsfile" .js)
             basex=$(basename "$jsfile" .jsx)
             cssfile="$(dirname "$jsfile")/$base.css"
             cssfilex="$(dirname "$jsfile")/$basex.css"
-            # If CSS file exists, check if JS file imports it
-            if [ -f "$cssfile" ]; then
-              if ! grep -q "import [\"']\\.?\\/?$base\\.css[\"']" "$jsfile"; then
-                echo "$jsfile is missing import for $base.css" >> missing_css_imports.txt
-              fi
-            elif [ -f "$cssfilex" ]; then
-              if ! grep -q "import [\"']\\.?\\/?$basex\\.css[\"']" "$jsfile"; then
-                echo "$jsfile is missing import for $basex.css" >> missing_css_imports.txt
+            target=""
+            [ -f "$cssfile" ] && target="$base.css"
+            [ -f "$cssfilex" ] && target="$basex.css"
+            if [ -n "$target" ]; then
+              # Check if already imported
+              if ! grep -q "import [\"']\\.?\\/?$target[\"']" "$jsfile"; then
+                # Insert import at the first line
+                sed -i "1iimport './$target';" "$jsfile"
+                echo "Injected import './$target'; into $jsfile"
+                injected_any=1
               fi
             fi
           done < js_files.txt
-          
-      - name: Fail if any CSS imports are missing
+          exit $injected_any
+
+      - name: Commit and Push changes
+        if: ${{ failure() }}
         run: |
-          if [ -s frontend/src/missing_css_imports.txt ]; then
-            echo "❌ Missing CSS imports detected:"
-            cat frontend/src/missing_css_imports.txt
-            exit 1
-          else
-            echo "✅ All component CSS files are correctly imported."
-          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "chore: auto-inject missing component CSS imports"
+          git push
