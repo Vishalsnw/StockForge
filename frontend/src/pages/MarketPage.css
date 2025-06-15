@@ -15,9 +15,18 @@
   text-align: center;
 }
 
-.market-page p {
-  color: #bfc9d1;
-  font-size: 1.15rem;
-  margin-bottom: 2rem;
-  text-align: center;
+.market-page button {
+  background: #13d47e;
+  color: #fff;
+  font-weight: bold;
+  padding: 0.65rem 2.2rem;
+  border-radius: 7px;
+  border: none;
+  font-size: 1.1rem;
+  margin-bottom: 1.5rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.market-page button:hover {
+  background: #12a7fe;
 }
