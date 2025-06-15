@@ -1,7 +1,7 @@
 import { sectors } from "../data/sectors";
 import { botNames } from "../data/botNames";
 import { addCompany } from "../data/companies";
-import { addCommodityOrder } from "../data/commodityOrders"; // You need to create this
+import { addCommodityOrder } from "../data/commodityOrders";
 
 export function generateBotCompanies(N = 200) {
   for (let i = 0; i < N; i++) {
@@ -23,14 +23,12 @@ export function generateBotCompanies(N = 200) {
     };
     addCompany(company);
 
-    // Commodity seller: create Ask order for each raw material produced
+    // Har product ke liye ek initial sell (Ask) order post karo
     sector.products.forEach(product => {
-      if (product in company.inventory) company.inventory[product] += 100;
-      else company.inventory[product] = 100;
       addCommodityOrder({
         commodity: product,
         price: 80 + Math.random()*40,
-        qty: 20 + Math.floor(Math.random()*80),
+        qty: 50 + Math.floor(Math.random()*100),
         seller: company.name,
         companyId: company.id
       });
