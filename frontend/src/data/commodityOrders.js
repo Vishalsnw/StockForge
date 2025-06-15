@@ -1,5 +1,3 @@
-// Commodity orders (buy/sell) localStorage ke sath
-
 const STORAGE_KEY = "market_commodity_orders";
 
 function loadOrders() {
@@ -18,7 +16,6 @@ function saveOrders(orders) {
   } catch {}
 }
 
-// Orders array (exported, always in sync with localStorage)
 export let commodityOrders = loadOrders();
 
 export function addCommodityOrder(order) {
