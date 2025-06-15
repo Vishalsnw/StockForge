@@ -10,6 +10,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Remove existing frontend/src (if any)
+        run: |
+          if [ -d "frontend/src" ]; then
+            rm -rf frontend/src
+            echo "Removed existing frontend/src"
+          fi
+
       - name: Ensure frontend folder exists
         run: mkdir -p frontend
 
@@ -32,5 +39,5 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add frontend/src
           git rm -r --cached src || true
-          git commit -m "Move src folder to frontend"
+          git commit -m "Move src folder to frontend (overwrite old src)"
           git push
