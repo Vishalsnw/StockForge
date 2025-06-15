@@ -1,0 +1,22 @@
+.dashboard {
+  padding: 2rem;
+  background: #f7f9fb;
+  min-height: 80vh;
+  font-family: 'Segoe UI', Arial, sans-serif;
+}
+.dashboard-main {
+  max-width: 900px;
+  margin: auto;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 4px 20px #0001;
+  padding: 2.5rem;
+}
+.dashboard-widgets {
+  display: flex;
+  gap: 2rem;
+  margin-top: 2rem;
+}
+.dashboard-widget {
+  flex: 1;
+}

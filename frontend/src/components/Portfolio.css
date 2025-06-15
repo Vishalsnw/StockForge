@@ -1,0 +1,32 @@
+.portfolio {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 12px #0011;
+  padding: 1.2rem 1.6rem;
+  margin: 2rem 0;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  max-width: 350px;
+}
+.portfolio h3 {
+  margin-bottom: 1rem;
+}
+.portfolio-table-wrap {
+  overflow-x: auto;
+}
+.portfolio table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.9rem;
+  background: #f8fafd;
+}
+.portfolio th, .portfolio td {
+  padding: 7px 10px;
+  border-bottom: 1px solid #e3e7ed;
+  text-align: left;
+}
+.portfolio.compact {
+  box-shadow: none;
+  padding: 0.5rem 0.5rem;
+  background: transparent;
+  max-width: unset;
+}

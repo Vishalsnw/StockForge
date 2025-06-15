@@ -1,0 +1,18 @@
+.news-feed {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 12px #0011;
+  padding: 1.4rem 1.5rem;
+  margin: 2rem 0;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  max-width: 350px;
+}
+.news-feed h3 {
+  margin-bottom: 1rem;
+}
+.news-feed.compact {
+  box-shadow: none;
+  padding: 0.5rem 0.5rem;
+  background: transparent;
+  max-width: unset;
+}

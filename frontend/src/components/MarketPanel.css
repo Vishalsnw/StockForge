@@ -1,0 +1,23 @@
+.market-panel {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 12px #0011;
+  margin: 2rem auto;
+  padding: 2.2rem 2.5rem;
+  max-width: 900px;
+  font-family: 'Segoe UI', Arial, sans-serif;
+}
+.market-panels {
+  display: flex;
+  gap: 2.5rem;
+  margin-top: 2rem;
+  flex-wrap: wrap;
+}
+.market-subpanel {
+  flex: 1 1 350px;
+  min-width: 320px;
+  background: #f4f8fe;
+  border-radius: 9px;
+  padding: 1.1rem 1.2rem;
+  box-shadow: 0 1px 6px #0012;
+}

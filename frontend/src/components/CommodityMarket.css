@@ -1,0 +1,35 @@
+.commodity-market {
+  font-family: 'Segoe UI', Arial, sans-serif;
+}
+.commodity-market h3 {
+  margin-bottom: 1rem;
+}
+.commodity-market table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+}
+.commodity-market th, .commodity-market td {
+  padding: 7px 10px;
+  border-bottom: 1px solid #e3e7ed;
+  text-align: left;
+}
+.btn-buy, .btn-sell {
+  padding: 0.25rem 0.7rem;
+  margin-right: 0.2rem;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+}
+.btn-buy {
+  background: #27ae60;
+  color: #fff;
+}
+.btn-sell {
+  background: #e74c3c;
+  color: #fff;
+}
+.commodity-market.compact th:last-child, 
+.commodity-market.compact td:last-child {
+  display: none;
+}

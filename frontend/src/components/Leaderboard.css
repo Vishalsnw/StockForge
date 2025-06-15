@@ -1,0 +1,26 @@
+.leaderboard {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 12px #0011;
+  margin: 2rem auto;
+  padding: 2rem 2.5rem;
+  max-width: 420px;
+  font-family: 'Segoe UI', Arial, sans-serif;
+}
+.leaderboard h2 {
+  margin-bottom: 1.2rem;
+}
+.leaderboard table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.leaderboard th, .leaderboard td {
+  padding: 8px 12px;
+  border-bottom: 1px solid #eef2f7;
+  text-align: left;
+}
+.leaderboard .first-place td {
+  font-weight: bold;
+  color: #4361ee;
+  background: #e7efff;
+}
