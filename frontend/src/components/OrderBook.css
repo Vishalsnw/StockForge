@@ -1,0 +1,42 @@
+.orderbook {
+  background: #171e26;
+  border-radius: 10px;
+  padding: 1.2rem 1.5rem 1.2rem 1.5rem;
+  color: #e7eaf0;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  width: 100%;
+  box-shadow: 0 3px 16px #0002;
+}
+.orderbook-header {
+  display: flex;
+  justify-content: space-between;
+  font-weight: bold;
+  color: #b3c7f7;
+  margin-bottom: 10px;
+  font-size: 1.11rem;
+}
+.orderbook-body {
+  display: flex;
+  gap: 2.5rem;
+}
+.orderbook-side {
+  flex: 1;
+}
+.orderbook-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 0;
+  font-size: 1.04rem;
+}
+.orderbook-row.buy .orderbook-price {
+  color: #58e58b;
+}
+.orderbook-row.buy .orderbook-qty {
+  color: #c4f5d1;
+}
+.orderbook-row.sell .orderbook-price {
+  color: #f25e5e;
+}
+.orderbook-row.sell .orderbook-qty {
+  color: #ffd5d5;
+}

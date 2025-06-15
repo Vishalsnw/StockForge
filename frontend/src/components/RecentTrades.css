@@ -1,0 +1,37 @@
+.recent-trades {
+  background: #171e26;
+  border-radius: 10px;
+  color: #e7eaf0;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  padding: 1.2rem 1.5rem 1.2rem 1.5rem;
+  width: 100%;
+  box-shadow: 0 3px 16px #0002;
+  margin-top: 1.25rem;
+}
+.recent-trades-header {
+  font-weight: bold;
+  color: #ffe39a;
+  margin-bottom: 10px;
+  font-size: 1.09rem;
+}
+.recent-trades-table {
+  width: 100%;
+}
+.recent-trades-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 1.01rem;
+  padding: 4px 0;
+}
+.recent-trades-row--header {
+  color: #b3c7f7;
+  font-weight: 600;
+  border-bottom: 1px solid #2c3750;
+  margin-bottom: 3px;
+}
+.recent-trades-row.buy span {
+  color: #58e58b;
+}
+.recent-trades-row.sell span {
+  color: #f25e5e;
+}
