@@ -4,7 +4,7 @@ import { addCompany } from "../data/companies";
 import { addCommodityOrder } from "../data/commodityOrders";
 import React, { createContext, useEffect } from "react";
 
-// Bot generator for initial companies & commodity orders
+// Generate bots and their commodity orders
 function generateBotCompanies(N = 30) {
   for (let i = 0; i < N; i++) {
     const sector = sectors[Math.floor(Math.random() * sectors.length)];
@@ -38,7 +38,6 @@ function generateBotCompanies(N = 30) {
   }
 }
 
-// Context to ensure bots are generated once per app mount
 const MarketBotContext = React.createContext();
 
 export function MarketBotProvider({ children }) {
