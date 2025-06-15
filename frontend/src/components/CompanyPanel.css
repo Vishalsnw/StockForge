@@ -1,0 +1,25 @@
+.company-panel {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 12px #0011;
+  padding: 2rem 2.5rem;
+  margin: 2rem auto;
+  max-width: 640px;
+  font-family: 'Segoe UI', Arial, sans-serif;
+}
+.company-summary {
+  font-size: 1.06rem;
+  margin-bottom: 1.6rem;
+  background: #f4f8fe;
+  border-radius: 9px;
+  padding: 1.3rem 1.8rem;
+}
+.company-products {
+  margin-top: 1.3rem;
+}
+.company-products ul {
+  padding-left: 1.2rem;
+}
+.company-products li {
+  padding: 0.2rem 0;
+}
