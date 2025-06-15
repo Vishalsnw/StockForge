@@ -1,3 +1,4 @@
+import './MarketTicker.css';
 import React, { useEffect, useState } from "react";
 import { companies } from "../data/companies";
 import "./MarketTicker.css";

@@ -1,3 +1,4 @@
+import './MarketPanel.css';
 import React from "react";
 import "./MarketPanel.css";
 import CommodityMarket from "./CommodityMarket";

@@ -1,3 +1,4 @@
+import './NewsFeed.css';
 import React from "react";
 import NewsBot from "../bots/NewsBot";
 import "./NewsFeed.css";

@@ -1,3 +1,4 @@
+import './App.css';
 import React from "react";
 import { CompanyProvider } from "./context/CompanyContext";
 import { ExchangeProvider } from "./context/ExchangeContext";

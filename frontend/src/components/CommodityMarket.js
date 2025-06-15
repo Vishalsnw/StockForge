@@ -1,3 +1,4 @@
+import './CommodityMarket.css';
 import React, { useState, useEffect } from "react";
 import { commodityOrders } from "../data/commodityOrders";
 

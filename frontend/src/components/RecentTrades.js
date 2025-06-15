@@ -1,3 +1,4 @@
+import './RecentTrades.css';
 import React from "react";
 import "./RecentTrades.css";
 

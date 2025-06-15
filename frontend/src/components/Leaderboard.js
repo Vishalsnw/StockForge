@@ -1,3 +1,4 @@
+import './Leaderboard.css';
 import React from "react";
 import { companies } from "../data/companies";
 

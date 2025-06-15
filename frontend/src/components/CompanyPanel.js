@@ -1,3 +1,4 @@
+import './CompanyPanel.css';
 import React, { useState } from "react";
 import "./CompanyPanel.css";
 
