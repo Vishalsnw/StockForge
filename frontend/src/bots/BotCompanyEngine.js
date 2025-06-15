@@ -2,8 +2,10 @@ import { sectors } from "../data/sectors";
 import { botNames } from "../data/botNames";
 import { addCompany } from "../data/companies";
 import { addCommodityOrder } from "../data/commodityOrders";
+import React, { createContext, useEffect } from "react";
 
-export function generateBotCompanies(N = 200) {
+// Bot generator for initial companies & commodity orders
+function generateBotCompanies(N = 30) {
   for (let i = 0; i < N; i++) {
     const sector = sectors[Math.floor(Math.random() * sectors.length)];
     const botName = botNames[Math.floor(Math.random() * botNames.length)];
@@ -16,22 +18,40 @@ export function generateBotCompanies(N = 200) {
       rawMaterials: sector.rawMaterials,
       products: sector.products,
       inventory: {},
-      balance: 100000 + Math.floor(Math.random() * 500000),
+      balance: 200000 + Math.floor(Math.random() * 300000),
       shares: 100000,
       sharePrice: 10 + Math.random() * 90,
       isBot: true
     };
     addCompany(company);
 
-    // Har product ke liye ek initial sell (Ask) order post karo
+    // Each product: create a sell order
     sector.products.forEach(product => {
       addCommodityOrder({
         commodity: product,
-        price: 80 + Math.random()*40,
-        qty: 50 + Math.floor(Math.random()*100),
+        price: 80 + Math.random() * 40,
+        qty: 50 + Math.floor(Math.random() * 100),
         seller: company.name,
         companyId: company.id
       });
     });
   }
+}
+
+// Context to ensure bots are generated once per app mount
+const MarketBotContext = React.createContext();
+
+export function MarketBotProvider({ children }) {
+  useEffect(() => {
+    if (!localStorage.getItem("market_bots_generated")) {
+      generateBotCompanies();
+      localStorage.setItem("market_bots_generated", "yes");
+    }
+  }, []);
+
+  return (
+    <MarketBotContext.Provider value={null}>
+      {children}
+    </MarketBotContext.Provider>
+  );
 }
