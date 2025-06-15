@@ -1,7 +1,8 @@
 import React from "react";
 import "./OrderBook.css";
 
-export default function OrderBook({ buyOrders = [], sellOrders = [] }) {
+// Accepts listedStocks to show company name/symbol in orderbook
+export default function OrderBook({ buyOrders = [], sellOrders = [], listedStocks = [] }) {
   return (
     <div className="orderbook">
       <div className="orderbook-header">
@@ -12,6 +13,9 @@ export default function OrderBook({ buyOrders = [], sellOrders = [] }) {
         <div className="orderbook-side">
           {buyOrders.map((order, idx) => (
             <div className="orderbook-row buy" key={idx}>
+              <span className="orderbook-symbol">
+                {order.symbol}
+              </span>
               <span className="orderbook-price">{order.price}</span>
               <span className="orderbook-qty">{order.qty}</span>
             </div>
@@ -20,6 +24,9 @@ export default function OrderBook({ buyOrders = [], sellOrders = [] }) {
         <div className="orderbook-side">
           {sellOrders.map((order, idx) => (
             <div className="orderbook-row sell" key={idx}>
+              <span className="orderbook-symbol">
+                {order.symbol}
+              </span>
               <span className="orderbook-price">{order.price}</span>
               <span className="orderbook-qty">{order.qty}</span>
             </div>

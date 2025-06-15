@@ -1,0 +1,33 @@
+.order-modal-backdrop {
+  position: fixed;
+  z-index: 1002;
+  left: 0; top: 0; width: 100vw; height: 100vh;
+  background: rgba(18,24,34, 0.84);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.22s;
+}
+.order-modal-content {
+  background: #232b3d;
+  border-radius: 13px;
+  padding: 1.7rem 2.2rem 1.6rem 2.2rem;
+  box-shadow: 0 6px 32px #0008;
+  position: relative;
+  min-width: 330px;
+  max-width: 90vw;
+}
+.order-modal-close {
+  position: absolute;
+  top: 13px;
+  right: 16px;
+  background: none;
+  border: none;
+  color: #ffe39a;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+@keyframes fadeIn {
+  from { opacity: 0;}
+  to { opacity: 1;}
+}

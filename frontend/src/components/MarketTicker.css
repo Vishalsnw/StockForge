@@ -1,0 +1,27 @@
+.market-ticker {
+  background: #151d2d;
+  padding: 0.7rem 2vw;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  color: #e8eaf6;
+  font-size: 1.1rem;
+  border-bottom: 1px solid #28335b;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+.ticker-inner {
+  display: flex;
+  gap: 2.5rem;
+  animation: ticker-move 40s linear infinite;
+}
+.ticker-up {
+  color: #6cffb0;
+  margin-right: 2rem;
+}
+.ticker-down {
+  color: #ff8787;
+  margin-right: 2rem;
+}
+@keyframes ticker-move {
+  0% { transform: translateX(0);}
+  100% { transform: translateX(-50%);}
+}
