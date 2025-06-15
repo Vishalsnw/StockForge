@@ -3,12 +3,14 @@ import MarketTicker from "../components/MarketTicker";
 import RegisterCompanyModal from "../components/RegisterCompanyModal";
 import CompanyDashboard from "../components/CompanyDashboard";
 import { companies } from "../data/companies";
+import { useUser } from "../context/UserContext";
 import "./MarketPage.css";
 
 export default function Market() {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedCompany, setSelectedCompany] = useState(null);
   const [refresh, setRefresh] = useState(0);
+  const { user } = useUser();
 
   function handleRegister() {
     setRefresh(x => x + 1);
@@ -18,6 +20,7 @@ export default function Market() {
     <div className="market-page">
       <MarketTicker />
       <h1>Market Overview</h1>
+      <div style={{marginBottom:"1rem",color:"#00ffb0"}}>Your Balance: ₹{user.balance.toLocaleString()}</div>
       <button onClick={() => setModalOpen(true)}>
         Open New Company
       </button>
