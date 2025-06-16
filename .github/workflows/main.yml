@@ -1,78 +1,57 @@
-name: Debug CSS Loading
+name: Analyze and Describe StockForge Repository
 
 on:
   workflow_dispatch:
 
 jobs:
-  debug-css:
+  analyze-repo:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: List directory structure
+      - name: Install dependencies
         run: |
-          echo "Directory structure:"
-          tree frontend/src || find frontend/src
-
-      - name: List all CSS, JS, and JSX files
-        run: |
-          echo "All CSS files:"
-          find frontend/src -type f -name "*.css"
-          echo "All JS files:"
-          find frontend/src -type f -name "*.js"
-          echo "All JSX files:"
-          find frontend/src -type f -name "*.jsx"
-
-      - name: Show first 10 lines of each JS/JSX file
-        run: |
-          echo "First 10 lines of each JS/JSX file (looking for CSS imports):"
-          for f in $(find frontend/src -type f \( -name "*.js" -o -name "*.jsx" \)); do
-            echo "==== $f ===="
-            head -10 "$f"
-            echo
-          done
-
-      - name: Show first 10 lines of each CSS file
-        run: |
-          echo "First 10 lines of each CSS file (checking for content):"
-          for f in $(find frontend/src -type f -name "*.css"); do
-            echo "==== $f ===="
-            head -10 "$f"
-            echo
-          done
-
-      - name: Check for missing CSS files or imports
-        run: |
-          echo "Checking for missing CSS files or imports..."
-          missing=0
-          for jsfile in $(find frontend/src -type f \( -name "*.js" -o -name "*.jsx" \)); do
-            base=$(basename "$jsfile" .js)
-            basex=$(basename "$jsfile" .jsx)
-            dir=$(dirname "$jsfile")
-            cssfile1="$dir/$base.css"
-            cssfile2="$dir/$basex.css"
-
-            if [ -f "$cssfile1" ]; then
-              if ! grep -q "import .*/$base.css" "$jsfile" && ! grep -q "import .*$base.css" "$jsfile"; then
-                echo "❌ $jsfile exists but does NOT import $base.css"
-                missing=1
-              fi
-            elif [ -f "$cssfile2" ]; then
-              if ! grep -q "import .*/$basex.css" "$jsfile" && ! grep -q "import .*$basex.css" "$jsfile"; then
-                echo "❌ $jsfile exists but does NOT import $basex.css"
-                missing=1
-              fi
-            else
-              echo "⚠️  No CSS file found for $jsfile"
-            fi
-          done
-
-          if [ $missing -eq 0 ]; then
-            echo "✅ All JS/JSX files with matching CSS have correct imports."
-          else
-            echo "Some imports are missing or CSS files are missing."
+          if [ -f "package.json" ]; then
+            npm install || true
+          fi
+          if [ -f "backend/package.json" ]; then
+            cd backend && npm install || true && cd ..
+          fi
+          if [ -f "frontend/package.json" ]; then
+            cd frontend && npm install || true && cd ..
           fi
 
-      - name: Output summary
-        run: echo "Check above logs for details. Attach this log if asking for help."
+      - name: List main project files and folders
+        run: |
+          echo "Repository structure:"
+          tree -L 3 || ls -R | head -50
+
+      - name: Search for main technologies and frameworks
+        run: |
+          echo "Detected technologies:"
+          grep -iE 'express|mongoose|react|redux|mysql|sequelize|socket|mongodb' \
+            backend/package.json frontend/package.json package.json || true
+
+      - name: Summarize backend endpoints
+        run: |
+          echo "Backend API Endpoints (express style):"
+          grep -r 'app\.use\|app\.get\|app\.post\|app\.put\|app\.delete' backend/ || true
+
+      - name: Summarize frontend routes
+        run: |
+          echo "Frontend Routes (react-router style):"
+          grep -r '<Route' frontend/src/ || true
+
+      - name: Output README if exists
+        run: |
+          if [ -f README.md ]; then
+            echo "README content:"
+            cat README.md
+          else
+            echo "No README found."
+          fi
+
+      - name: Final auto-analysis summary
+        run: |
+          echo "This repository appears to be a stock market simulation game with a React frontend and Node.js/Express backend. It includes trading features, bot simulation, and a professional UI. For more, see the README above or explore the source code files."
